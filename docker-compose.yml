@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgres:17.2
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: AirLink
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - network
+
+  app:
+    build:
+      context: .
+      dockerfile: ./docker-files/java/Dockerfile
+    container_name: app
+    restart: on-failure
+    depends_on:
+      - postgres
+      - mailhog
+      - redis
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/AirLink
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: secret
+      SPRING_REDIS_HOST: redis
+    volumes:
+      - .:/app
+      - ~/.m2:/root/.m2
+    networks:
+      - network
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    restart: no
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - network
+
+  redis:
+    image: redis:7.4.2-alpine
+    container_name: redis
+    restart: no
+    ports:
+      - "6379:6379"
+    networks:
+      - network
+
+volumes:
+  postgres_data:
+
+networks:
+  network:
+    driver: bridge
