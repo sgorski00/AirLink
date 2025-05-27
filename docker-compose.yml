@@ -19,18 +19,15 @@ services:
       context: .
       dockerfile: ./docker-files/java/Dockerfile
     container_name: app
-    restart: on-failure
+    restart: always
     depends_on:
       - postgres
       - mailhog
       - redis
     ports:
       - "8080:8080"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/AirLink
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: secret
-      SPRING_REDIS_HOST: redis
+    env_file:
+      - .env
     volumes:
       - .:/app
       - ~/.m2:/root/.m2
@@ -40,7 +37,7 @@ services:
   mailhog:
     image: mailhog/mailhog
     container_name: mailhog
-    restart: no
+    restart: always
     ports:
       - "1025:1025"
       - "8025:8025"
@@ -50,7 +47,7 @@ services:
   redis:
     image: redis:7.4.2-alpine
     container_name: redis
-    restart: no
+    restart: always
     ports:
       - "6379:6379"
     networks:
