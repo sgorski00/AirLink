@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ApiResponse<T> {
-    private String message;
-    private int code;
+    private String detail;
+    private int status;
     private T data;
 }

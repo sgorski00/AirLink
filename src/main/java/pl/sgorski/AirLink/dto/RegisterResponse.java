@@ -7,5 +7,4 @@ public class RegisterResponse {
     private Long id;
     private String email;
     private String roleName;
-    private String message;
 }
