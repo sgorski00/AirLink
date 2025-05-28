@@ -15,6 +15,5 @@ public interface RegistrationMapper {
     User toUser(RegisterRequest request, Role role);
 
     @Mapping(target = "roleName", source = "role.name")
-    @Mapping(target = "message", constant = "Registration successful")
     RegisterResponse toResponse(User user);
 }

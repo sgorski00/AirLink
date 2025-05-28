@@ -24,7 +24,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User save(User user) {
-        log.info("Saving user {}", user);
+        log.debug("Saving new user {}", user);
         return userRepository.save(user);
     }
 
