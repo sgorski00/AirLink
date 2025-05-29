@@ -1,4 +1,4 @@
-package pl.sgorski.AirLink.model;
+package pl.sgorski.AirLink.model.auth;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.List;
 @Table(name = "users")
 @Entity
 @Data
-public class User implements UserDetails {
+public class User implements UserDetails, Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,6 +39,8 @@ public class User implements UserDetails {
 
     @UpdateTimestamp
     private Timestamp updatedAt;
+
+    private Timestamp deletedAt;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

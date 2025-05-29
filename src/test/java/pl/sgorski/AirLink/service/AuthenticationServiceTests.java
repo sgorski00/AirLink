@@ -7,14 +7,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.sgorski.AirLink.dto.LoginRequest;
 import pl.sgorski.AirLink.dto.LoginResponse;
 import pl.sgorski.AirLink.dto.RegisterRequest;
 import pl.sgorski.AirLink.dto.RegisterResponse;
 import pl.sgorski.AirLink.mapper.RegistrationMapper;
-import pl.sgorski.AirLink.model.Role;
-import pl.sgorski.AirLink.model.User;
+import pl.sgorski.AirLink.model.auth.Role;
+import pl.sgorski.AirLink.model.auth.User;
+import pl.sgorski.AirLink.service.auth.AuthenticationService;
+import pl.sgorski.AirLink.service.auth.JwtService;
+import pl.sgorski.AirLink.service.auth.RoleService;
+import pl.sgorski.AirLink.service.auth.UserService;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +40,9 @@ public class AuthenticationServiceTests {
 
     @Mock
     private RoleService roleService;
+
+    @Mock
+    private UserDetailsService userDetailsService;
 
     @Mock
     private RegistrationMapper mapper;
@@ -61,7 +69,7 @@ public class AuthenticationServiceTests {
 
     @Test
     void shouldAuthenticateCorrectRequest() {
-        when(userService.loadUserByUsername(anyString())).thenReturn(user);
+        when(userDetailsService.loadUserByUsername(anyString())).thenReturn(user);
         when(jwtService.generateToken(any(User.class))).thenReturn("token");
 
         LoginResponse response = authenticationService.authenticate(loginRequest);
@@ -76,17 +84,17 @@ public class AuthenticationServiceTests {
 
         assertThrows(RuntimeException.class, () -> authenticationService.authenticate(loginRequest));
         verify(manager, times(1)).authenticate(any());
-        verify(userService, times(0)).loadUserByUsername(anyString());
+        verify(userDetailsService, times(0)).loadUserByUsername(anyString());
         verify(jwtService, times(0)).generateToken(any(User.class));
     }
 
     @Test
     void shouldThrowExceptionWhileAuthenticationIfUserNotFound() {
-        when(userService.loadUserByUsername(anyString())).thenThrow(new RuntimeException());
+        when(userDetailsService.loadUserByUsername(anyString())).thenThrow(new RuntimeException());
 
         assertThrows(RuntimeException.class, () -> authenticationService.authenticate(loginRequest));
         verify(manager, times(1)).authenticate(any());
-        verify(userService, times(1)).loadUserByUsername(anyString());
+        verify(userDetailsService, times(1)).loadUserByUsername(anyString());
         verify(jwtService, times(0)).generateToken(any(User.class));
     }
 

@@ -15,7 +15,7 @@ import pl.sgorski.AirLink.dto.LoginRequest;
 import pl.sgorski.AirLink.dto.LoginResponse;
 import pl.sgorski.AirLink.dto.RegisterRequest;
 import pl.sgorski.AirLink.dto.RegisterResponse;
-import pl.sgorski.AirLink.service.AuthenticationService;
+import pl.sgorski.AirLink.service.auth.AuthenticationService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;

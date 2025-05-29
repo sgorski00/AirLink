@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import pl.sgorski.AirLink.dto.RegisterRequest;
 import pl.sgorski.AirLink.dto.RegisterResponse;
-import pl.sgorski.AirLink.model.Role;
-import pl.sgorski.AirLink.model.User;
+import pl.sgorski.AirLink.model.auth.Role;
+import pl.sgorski.AirLink.model.auth.User;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
