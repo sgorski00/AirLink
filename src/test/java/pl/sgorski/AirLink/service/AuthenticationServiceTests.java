@@ -8,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.sgorski.AirLink.dto.LoginRequest;
 import pl.sgorski.AirLink.dto.LoginResponse;
 import pl.sgorski.AirLink.dto.RegisterRequest;
@@ -46,9 +45,6 @@ public class AuthenticationServiceTests {
 
     @Mock
     private RegistrationMapper mapper;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private AuthenticationService authenticationService;
@@ -109,7 +105,6 @@ public class AuthenticationServiceTests {
         RegisterResponse response = authenticationService.register(registerRequest);
 
         assertNotNull(response);
-        verify(passwordEncoder, times(1)).encode(anyString());
         verify(userService, times(1)).save(any(User.class));
     }
 }
