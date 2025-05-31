@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import pl.sgorski.AirLink.dto.FlightResponse;
-import pl.sgorski.AirLink.mapper.FlightMapper;
 import pl.sgorski.AirLink.model.Flight;
 import pl.sgorski.AirLink.repository.FlightRepository;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -17,7 +17,6 @@ import java.util.NoSuchElementException;
 public class FlightService {
 
     private final FlightRepository flightRepository;
-    private final FlightMapper flightMapper;
 
     @CachePut(value = "flights", key = "#flight.id")
     public Flight save(Flight flight) {
@@ -26,13 +25,6 @@ public class FlightService {
 
     public List<Flight> findAll() {
         return flightRepository.findAll();
-    }
-
-    public List<FlightResponse> findAllResponses(){
-        List<Flight> allFlights = findAll();
-        return allFlights.stream()
-                .map(flightMapper::toResponse).
-                toList();
     }
 
     @Cacheable(value = "flights", key = "#id")
@@ -44,5 +36,23 @@ public class FlightService {
 
     public long count() {
         return flightRepository.count();
+    }
+
+    @CachePut(value = "flights", key = "#id")
+    public Flight deleteFlightById(Long id) {
+        Flight flight = flightRepository.findById(id).orElseThrow(
+            () -> new NoSuchElementException("Flight not found")
+        );
+        flight.setDeletedAt(Timestamp.from(Instant.now()));
+        return flightRepository.save(flight);
+    }
+
+    @CachePut(value = "flights", key = "#id")
+    public Flight restoreById(Long id) {
+        Flight flight = flightRepository.findById(id).orElseThrow(
+            () -> new NoSuchElementException("Flight not found")
+        );
+        flight.setDeletedAt(null);
+        return flightRepository.save(flight);
     }
 }
