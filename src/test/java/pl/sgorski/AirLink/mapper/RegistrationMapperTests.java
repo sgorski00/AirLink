@@ -45,7 +45,7 @@ public class RegistrationMapperTests {
         RegisterResponse response = mapper.toResponse(user);
 
         assertEquals("email@email.com", response.getEmail());
-        assertEquals("USER", response.getRoleName());
+        assertEquals("USER", response.getRole());
         assertEquals(5L, response.getId());
     }
 }

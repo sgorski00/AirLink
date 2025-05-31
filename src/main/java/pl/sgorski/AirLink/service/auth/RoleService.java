@@ -1,5 +1,6 @@
 package pl.sgorski.AirLink.service.auth;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.cache.annotation.CachePut;
@@ -17,10 +18,10 @@ public class RoleService {
 
     private final RoleRepository roleRepository;
 
-    @CachePut(value = "roles", key = "#role.name")
-    public void save(Role role) {
+    @CachePut(value = "roles", key = "#result.name")
+    public Role save(@Valid Role role) {
         log.debug("Saving new role {}", role);
-        roleRepository.save(role);
+        return roleRepository.save(role);
     }
 
     @Cacheable(value = "roles", key = "#name")

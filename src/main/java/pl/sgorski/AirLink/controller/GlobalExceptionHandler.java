@@ -1,5 +1,7 @@
 package pl.sgorski.AirLink.controller;
 
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -26,6 +28,19 @@ public class GlobalExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errorMessage);
     }
 
+    @ExceptionHandler(DataAccessException.class)
+    public ProblemDetail handleDataAccessException(DataAccessException e) {
+        if (e instanceof DataIntegrityViolationException ie) {
+            return ProblemDetail.forStatusAndDetail(
+                    HttpStatus.CONFLICT,
+                    "Data integrity violation: " + ie.getMostSpecificCause().getMessage()
+            );
+        }
+        return ProblemDetail.forStatusAndDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Database error: " + e.getMessage()
+        );
+    }
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleException(Exception e) {

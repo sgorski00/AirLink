@@ -97,7 +97,7 @@ public class AuthControllerTests {
     void shouldRegister() throws Exception {
         RegisterResponse response = new RegisterResponse();
         response.setEmail("user@email.com");
-        response.setRoleName("USER");
+        response.setRole("USER");
         response.setId(999L);
         when(authenticationService.register(any(RegisterRequest.class))).thenReturn(response);
 
@@ -212,7 +212,7 @@ public class AuthControllerTests {
     void shouldRegisterIfPasswordContainsSymbols() throws Exception {
         RegisterResponse response = new RegisterResponse();
         response.setEmail("user@email.com");
-        response.setRoleName("USER");
+        response.setRole("USER");
         response.setId(999L);
         when(authenticationService.register(any(RegisterRequest.class))).thenReturn(response);
 

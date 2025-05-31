@@ -25,8 +25,6 @@ import pl.sgorski.AirLink.service.localization.CountryService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Log4j2
 @Component
@@ -152,11 +150,17 @@ public class DataSeeder implements ApplicationRunner {
                     .get()
             );
 
-            LocalDateTime departure = LocalDateTime.now().withSecond(0).withNano(0).withMinute(0)
+            LocalDateTime departure = LocalDateTime.now()
+                    .withSecond(0)
+                    .withNano(0)
+                    .withMinute(faker.number().numberBetween(0, 60))
                     .plusHours(faker.number().numberBetween(0, 24))
                     .plusDays(faker.number().numberBetween(-100, 100));
             flight.setDeparture(departure);
-            flight.setArrival(departure.plusHours(faker.number().numberBetween(1, 14)));
+            flight.setArrival(departure
+                    .plusMinutes(faker.number().numberBetween(0, 60))
+                    .plusHours(faker.number().numberBetween(1, 14))
+            );
 
             flight.setPrice(faker.number().randomDouble(2, 100, 500));
 
