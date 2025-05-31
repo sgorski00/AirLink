@@ -4,8 +4,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import pl.sgorski.AirLink.dto.RegisterRequest;
 import pl.sgorski.AirLink.dto.RegisterResponse;
-import pl.sgorski.AirLink.model.Role;
-import pl.sgorski.AirLink.model.User;
+import pl.sgorski.AirLink.model.auth.Role;
+import pl.sgorski.AirLink.model.auth.User;
 
 @Mapper(componentModel = "spring")
 public interface RegistrationMapper {
@@ -14,6 +14,6 @@ public interface RegistrationMapper {
     @Mapping(target = "role", source = "role")
     User toUser(RegisterRequest request, Role role);
 
-    @Mapping(target = "roleName", source = "role.name")
+    @Mapping(target = "role", source = "role.name")
     RegisterResponse toResponse(User user);
 }

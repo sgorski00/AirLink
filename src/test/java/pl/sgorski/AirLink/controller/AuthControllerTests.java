@@ -5,17 +5,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import pl.sgorski.AirLink.dto.LoginRequest;
 import pl.sgorski.AirLink.dto.LoginResponse;
 import pl.sgorski.AirLink.dto.RegisterRequest;
 import pl.sgorski.AirLink.dto.RegisterResponse;
-import pl.sgorski.AirLink.service.AuthenticationService;
+import pl.sgorski.AirLink.service.auth.AuthenticationService;
+import pl.sgorski.AirLink.service.auth.JwtService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -23,9 +23,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureMockMvc
+@WebMvcTest(AuthController.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class AuthControllerTests {
 
     @Autowired
@@ -36,6 +35,9 @@ public class AuthControllerTests {
 
     @MockitoBean
     private AuthenticationService authenticationService;
+
+    @MockitoBean
+    private JwtService jwtService;
 
     private LoginRequest loginRequest;
     private RegisterRequest registerRequest;
@@ -95,7 +97,7 @@ public class AuthControllerTests {
     void shouldRegister() throws Exception {
         RegisterResponse response = new RegisterResponse();
         response.setEmail("user@email.com");
-        response.setRoleName("USER");
+        response.setRole("USER");
         response.setId(999L);
         when(authenticationService.register(any(RegisterRequest.class))).thenReturn(response);
 
@@ -210,7 +212,7 @@ public class AuthControllerTests {
     void shouldRegisterIfPasswordContainsSymbols() throws Exception {
         RegisterResponse response = new RegisterResponse();
         response.setEmail("user@email.com");
-        response.setRoleName("USER");
+        response.setRole("USER");
         response.setId(999L);
         when(authenticationService.register(any(RegisterRequest.class))).thenReturn(response);
 

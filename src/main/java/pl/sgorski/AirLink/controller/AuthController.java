@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.sgorski.AirLink.dto.*;
-import pl.sgorski.AirLink.service.AuthenticationService;
+import pl.sgorski.AirLink.service.auth.AuthenticationService;
 
 @RestController
 @RequiredArgsConstructor

@@ -1,4 +1,4 @@
-package pl.sgorski.AirLink.service;
+package pl.sgorski.AirLink.service.auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

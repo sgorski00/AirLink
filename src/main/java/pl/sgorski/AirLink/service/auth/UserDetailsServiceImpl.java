@@ -1,34 +1,24 @@
-package pl.sgorski.AirLink.service;
+package pl.sgorski.AirLink.service.auth;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import pl.sgorski.AirLink.model.User;
-import pl.sgorski.AirLink.repository.UserRepository;
+import pl.sgorski.AirLink.repository.auth.UserRepository;
 
-@Log4j2
 @Service
 @RequiredArgsConstructor
-public class UserService implements UserDetailsService {
+public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
 
     @Override
+    @Cacheable(value = "users", key = "#email")
     public UserDetails loadUserByUsername(String email) {
         return userRepository.findByEmail(email).orElseThrow(
                 () -> new UsernameNotFoundException("User " + email + " not found")
         );
-    }
-
-    public User save(User user) {
-        log.debug("Saving new user {}", user);
-        return userRepository.save(user);
-    }
-
-    public long count() {
-        return userRepository.count();
     }
 }
