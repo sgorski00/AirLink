@@ -81,10 +81,10 @@ public class FlightServiceTests {
     @Test
     void shouldRestoreSoftDelete() {
         flight.setDeletedAt(Timestamp.from(Instant.now()));
-        when(flightRepository.findById(anyLong())).thenReturn(Optional.of(flight));
+        when(flightRepository.findDeletedById(anyLong())).thenReturn(Optional.of(flight));
         flightService.restoreById(1L);
 
-        verify(flightRepository, times(1)).findById(anyLong());
+        verify(flightRepository, times(1)).findDeletedById(anyLong());
         verify(flightRepository, times(1)).save(flight);
         assertNull(flight.getDeletedAt());
     }

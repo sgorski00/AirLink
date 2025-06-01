@@ -51,7 +51,7 @@ public class Flight implements Serializable {
     @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reservation> reservations;
 
-    public long getAvailableSeats() {
+    public int getAvailableSeats() {
         if(reservations == null) return airplane.getSeats();
         return airplane.getSeats() - reservations.stream()
                 .filter(reservation -> reservation.getStatus() == ReservationStatus.CONFIRMED || reservation.getStatus() == ReservationStatus.PENDING)
@@ -61,5 +61,11 @@ public class Flight implements Serializable {
 
     public boolean hasAvailableSeats(int numberOfSeats) {
         return getAvailableSeats() >= numberOfSeats;
+    }
+
+    public boolean isAvailableToBook(int numberOfSeats) {
+        return deletedAt == null
+                && departure.isAfter(LocalDateTime.now())
+                && hasAvailableSeats(numberOfSeats);
     }
 }

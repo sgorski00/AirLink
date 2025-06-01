@@ -55,8 +55,8 @@ public class FlightService {
 
     @CachePut(value = "flights", key = "#id")
     public Flight restoreById(Long id) {
-        Flight flight = flightRepository.findById(id).orElseThrow(
-            () -> new NoSuchElementException("Flight not found")
+        Flight flight = flightRepository.findDeletedById(id).orElseThrow(
+            () -> new NoSuchElementException("Flight not found or not deleted")
         );
         flight.setDeletedAt(null);
         return flightRepository.save(flight);
