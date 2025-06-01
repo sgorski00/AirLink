@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import pl.sgorski.AirLink.model.Airplane;
 import pl.sgorski.AirLink.model.Flight;
 import pl.sgorski.AirLink.repository.FlightRepository;
 
@@ -17,9 +18,14 @@ import java.util.NoSuchElementException;
 public class FlightService {
 
     private final FlightRepository flightRepository;
+    private final AirplaneService airplaneService;
 
     @CachePut(value = "flights", key = "#flight.id")
     public Flight save(Flight flight) {
+        Airplane airplane = airplaneService.findByIdWithFlights(flight.getAirplane().getId());
+        if(!airplane.isAvailable(flight.getDeparture(), flight.getArrival())) {
+            throw new IllegalArgumentException("Airplane is not available for the specified time.");
+        }
         return flightRepository.save(flight);
     }
 
@@ -49,10 +55,16 @@ public class FlightService {
 
     @CachePut(value = "flights", key = "#id")
     public Flight restoreById(Long id) {
-        Flight flight = flightRepository.findById(id).orElseThrow(
-            () -> new NoSuchElementException("Flight not found")
+        Flight flight = flightRepository.findDeletedById(id).orElseThrow(
+            () -> new NoSuchElementException("Flight not found or not deleted")
         );
         flight.setDeletedAt(null);
         return flightRepository.save(flight);
+    }
+
+    public Flight findByIdWithReservations(Long flightId) {
+        return flightRepository.findByIdWithReservations(flightId).orElseThrow(
+            () -> new NoSuchElementException("Flight with id: " + flightId + " not found")
+        );
     }
 }

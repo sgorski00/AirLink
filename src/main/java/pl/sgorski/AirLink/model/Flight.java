@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "flights")
@@ -46,4 +47,25 @@ public class Flight implements Serializable {
     private Timestamp updatedAt;
 
     private Timestamp deletedAt;
+
+    @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reservation> reservations;
+
+    public int getAvailableSeats() {
+        if(reservations == null) return airplane.getSeats();
+        return airplane.getSeats() - reservations.stream()
+                .filter(reservation -> reservation.getStatus() == ReservationStatus.CONFIRMED || reservation.getStatus() == ReservationStatus.PENDING)
+                .mapToInt(Reservation::getNumberOfSeats)
+                .sum();
+    }
+
+    public boolean hasAvailableSeats(int numberOfSeats) {
+        return getAvailableSeats() >= numberOfSeats;
+    }
+
+    public boolean isAvailableToBook(int numberOfSeats) {
+        return deletedAt == null
+                && departure.isAfter(LocalDateTime.now())
+                && hasAvailableSeats(numberOfSeats);
+    }
 }
