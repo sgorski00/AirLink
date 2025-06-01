@@ -7,6 +7,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -38,4 +39,13 @@ public class Airplane implements Serializable {
 
     @OneToMany(mappedBy = "airplane", fetch = FetchType.LAZY)
     private List<Flight> flights;
+
+    public boolean isAvailable(LocalDateTime departure, LocalDateTime arrival) {
+        if(flights == null || flights.isEmpty()) return true;
+        return flights.stream()
+                .filter(flight -> flight.getDeletedAt() == null)
+                .noneMatch(flight ->
+                    (departure.isBefore(flight.getArrival()) && arrival.isAfter(flight.getDeparture()))
+                );
+    }
 }

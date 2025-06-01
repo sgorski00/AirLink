@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import pl.sgorski.AirLink.model.Airplane;
 import pl.sgorski.AirLink.model.Flight;
 import pl.sgorski.AirLink.repository.FlightRepository;
 
@@ -17,9 +18,14 @@ import java.util.NoSuchElementException;
 public class FlightService {
 
     private final FlightRepository flightRepository;
+    private final AirplaneService airplaneService;
 
     @CachePut(value = "flights", key = "#flight.id")
     public Flight save(Flight flight) {
+        Airplane airplane = airplaneService.findByIdWithFlights(flight.getAirplane().getId());
+        if(!airplane.isAvailable(flight.getDeparture(), flight.getArrival())) {
+            throw new IllegalArgumentException("Airplane is not available for the specified time.");
+        }
         return flightRepository.save(flight);
     }
 

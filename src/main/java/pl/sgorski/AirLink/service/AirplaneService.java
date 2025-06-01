@@ -30,4 +30,10 @@ public class AirplaneService {
             () -> new NoSuchElementException("Airplane with id " + id + " not found")
         );
     }
+
+    public Airplane findByIdWithFlights(Long id) {
+        return airplaneRepository.findByIdWithFlights(id).orElseThrow(
+            () -> new NoSuchElementException("Airplane with id " + id + " not found")
+        );
+    }
 }

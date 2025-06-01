@@ -1,13 +1,11 @@
 package pl.sgorski.AirLink.mapper;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import pl.sgorski.AirLink.dto.FlightRequest;
 import pl.sgorski.AirLink.dto.FlightResponse;
 import pl.sgorski.AirLink.model.Airplane;

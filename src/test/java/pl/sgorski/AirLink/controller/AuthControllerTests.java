@@ -108,7 +108,7 @@ public class AuthControllerTests {
                 .andExpect(jsonPath("$.detail").value("User registered successfully"))
                 .andExpect(jsonPath("$.status").value(201))
                 .andExpect(jsonPath("$.data.email").value("user@email.com"))
-                .andExpect(jsonPath("$.data.roleName").value("USER"))
+                .andExpect(jsonPath("$.data.role").value("USER"))
                 .andExpect(jsonPath("$.data.id").value(999L));
     }
 
@@ -225,7 +225,7 @@ public class AuthControllerTests {
                 .andExpect(jsonPath("$.detail").value("User registered successfully"))
                 .andExpect(jsonPath("$.status").value(201))
                 .andExpect(jsonPath("$.data.email").value("user@email.com"))
-                .andExpect(jsonPath("$.data.roleName").value("USER"))
+                .andExpect(jsonPath("$.data.role").value("USER"))
                 .andExpect(jsonPath("$.data.id").value(999L));
     }
 }
