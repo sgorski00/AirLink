@@ -1,10 +1,13 @@
 package pl.sgorski.AirLink.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.sgorski.AirLink.dto.ApiResponse;
-import pl.sgorski.AirLink.dto.ReservationRequest;
+import pl.sgorski.AirLink.dto.NewReservationRequest;
 import pl.sgorski.AirLink.dto.ReservationResponse;
+import pl.sgorski.AirLink.dto.UpdateReservationRequest;
 import pl.sgorski.AirLink.mapper.ReservationMapper;
 import pl.sgorski.AirLink.model.Reservation;
 import pl.sgorski.AirLink.service.ReservationService;
@@ -20,71 +23,70 @@ public class ReservationController {
     private final ReservationMapper mapper;
 
     @GetMapping
-    public ApiResponse<List<ReservationResponse>> getReservations() {
-        return new ApiResponse<>(
+    public ResponseEntity<?> getReservations() {
+        return ResponseEntity.ok(new ApiResponse<>(
             "Reservations found",
             200,
             reservationService.findAll().stream()
                 .map(mapper::toResponse)
                 .toList()
-        );
+        ));
     }
 
     @GetMapping("{id}")
-    public ApiResponse<ReservationResponse> getReservationById(
+    public ResponseEntity<?> getReservationById(
             @PathVariable Long id
     ) {
-        return new ApiResponse<>(
+        return ResponseEntity.ok(new ApiResponse<>(
             "Reservation found",
             200,
             mapper.toResponse(reservationService.findById(id))
-        );
+        ));
     }
 
     @PostMapping
-    public ApiResponse<ReservationResponse> createReservation(
-            @RequestBody ReservationRequest request
+    public ResponseEntity<?> createReservation(
+            @Valid @RequestBody NewReservationRequest request
     ) {
-        return new ApiResponse<>(
+        return ResponseEntity.status(201).body(new ApiResponse<>(
             "Reservation created",
             201,
             mapper.toResponse(reservationService.save(mapper.toReservation(request)))
-        );
+        ));
     }
 
     @PutMapping("{id}")
-    public ApiResponse<ReservationResponse> updateReservation(
+    public ResponseEntity<?> updateReservation(
             @PathVariable Long id,
-            @RequestBody ReservationRequest request
+            @Valid @RequestBody UpdateReservationRequest request
     ) {
-        Reservation reservation = reservationService.findById(id);
-        mapper.updateReservation(request, reservation);
-        return new ApiResponse<>(
+        Reservation updated = reservationService.updateReservationById(id, request);
+        return ResponseEntity.ok(new ApiResponse<>(
             "Reservation updated",
             200,
-            mapper.toResponse(reservationService.save(reservation))
-        );
+            mapper.toResponse(updated)
+        ));
     }
 
     @DeleteMapping("{id}")
-    public ApiResponse<ReservationResponse> deleteReservation(
+    public ResponseEntity<?> deleteReservation(
             @PathVariable Long id
     ) {
-        return new ApiResponse<>(
+        return ResponseEntity.ok(new ApiResponse<>(
             "Reservation deleted",
             200,
             mapper.toResponse(reservationService.deleteById(id))
-        );
+        ));
     }
 
     @PutMapping("/restore/{id}")
-    public ApiResponse<ReservationResponse> restoreReservation(
+    public ResponseEntity<?> restoreReservation(
             @PathVariable Long id
     ) {
-        return new ApiResponse<>(
+        return ResponseEntity.ok(new ApiResponse<>(
                 "Reservation restored",
                 200,
                 mapper.toResponse(reservationService.restoreById(id))
-        );
+        ));
     }
 }

@@ -3,8 +3,9 @@ package pl.sgorski.AirLink.mapper;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.sgorski.AirLink.dto.FlightResponse;
-import pl.sgorski.AirLink.dto.ReservationRequest;
+import pl.sgorski.AirLink.dto.NewReservationRequest;
 import pl.sgorski.AirLink.dto.ReservationResponse;
+import pl.sgorski.AirLink.dto.UpdateReservationRequest;
 import pl.sgorski.AirLink.model.Flight;
 import pl.sgorski.AirLink.model.Reservation;
 import pl.sgorski.AirLink.model.auth.User;
@@ -29,11 +30,7 @@ public abstract class ReservationMapper {
 
     @Mapping(target = "user", source = "userId", qualifiedByName = "userById")
     @Mapping(target = "flight", source = "flightId", qualifiedByName = "flightById")
-    public abstract Reservation toReservation(ReservationRequest request);
-
-    @Mapping(target = "user", source = "userId", qualifiedByName = "userById")
-    @Mapping(target = "flight", source = "flightId", qualifiedByName = "flightById")
-    public abstract void updateReservation(ReservationRequest request, @MappingTarget Reservation reservation);
+    public abstract Reservation toReservation(NewReservationRequest request);
 
     @Named("flightResponse")
     protected FlightResponse flightResponse(Flight flight) {

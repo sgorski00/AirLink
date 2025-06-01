@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
-public class ReservationRequest {
+public class NewReservationRequest {
     @NotNull(message = "User must be specified")
     private Long userId;
     @NotNull(message = "Flight must be specified")
@@ -13,6 +13,4 @@ public class ReservationRequest {
     @Positive(message = "Number of seats must be a positive number")
     @NotNull(message = "Number of seats must be specified")
     private Integer numberOfSeats;
-    @NotNull(message = "Status must be specified")
-    private String status;
 }

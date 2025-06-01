@@ -29,6 +29,14 @@ public class FlightController {
         return ResponseEntity.ok(new ApiResponse<>("Flights", 200, flights));
     }
 
+    @GetMapping("{id}")
+    public ResponseEntity<ApiResponse<FlightResponse>> getFlightById(
+            @PathVariable Long id
+    ) {
+        FlightResponse flightResponse = flightMapper.toResponse(flightService.findById(id));
+        return ResponseEntity.ok(new ApiResponse<>("Flight found", 200, flightResponse));
+    }
+
     @DeleteMapping("{id}")
     public ResponseEntity<ApiResponse<FlightResponse>> deleteFlight(
             @PathVariable Long id

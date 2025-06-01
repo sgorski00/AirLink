@@ -2,7 +2,9 @@ package pl.sgorski.AirLink.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import pl.sgorski.AirLink.dto.UpdateReservationRequest;
 import pl.sgorski.AirLink.model.Reservation;
+import pl.sgorski.AirLink.model.ReservationStatus;
 import pl.sgorski.AirLink.repository.ReservationRepository;
 
 import java.sql.Timestamp;
@@ -17,8 +19,8 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
 
     public Reservation save(Reservation reservation) {
-        if(!reservation.getFlight().hasAvailableSeats(reservation.getNumberOfSeats())){
-            throw new IllegalArgumentException("Not enough available seats on the flight.");
+        if(!reservation.getFlight().isAvailableToBook(reservation.getNumberOfSeats())){
+            throw new IllegalArgumentException("This flight is no longer available to book.");
         }
         return reservationRepository.save(reservation);
     }
@@ -51,5 +53,15 @@ public class ReservationService {
 
     public long count() {
         return reservationRepository.count();
+    }
+
+    public Reservation updateReservationById(Long id, UpdateReservationRequest request) {
+        Reservation reservation = findById(id);
+        try{
+            reservation.setStatus(ReservationStatus.valueOf(request.getStatus().toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid status provided: " + request.getStatus());
+        }
+        return save(reservation);
     }
 }
