@@ -9,6 +9,7 @@ import pl.sgorski.AirLink.model.auth.User;
 import pl.sgorski.AirLink.repository.auth.UserRepository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Log4j2
 @Service
@@ -31,5 +32,11 @@ public class UserService {
 
     public List<User> findAll() {
         return userRepository.findAll();
+    }
+
+    public User findById(Long id) {
+        return userRepository.findById(id).orElseThrow(
+                () -> new NoSuchElementException("User not found with id: " + id)
+        );
     }
 }

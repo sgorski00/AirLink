@@ -61,4 +61,10 @@ public class FlightService {
         flight.setDeletedAt(null);
         return flightRepository.save(flight);
     }
+
+    public Flight findByIdWithReservations(Long flightId) {
+        return flightRepository.findByIdWithReservations(flightId).orElseThrow(
+            () -> new NoSuchElementException("Flight with id: " + flightId + " not found")
+        );
+    }
 }

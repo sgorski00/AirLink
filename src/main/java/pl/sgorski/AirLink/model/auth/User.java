@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import pl.sgorski.AirLink.model.Reservation;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -41,6 +42,9 @@ public class User implements UserDetails, Serializable {
     private Timestamp updatedAt;
 
     private Timestamp deletedAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Reservation> reservations;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
