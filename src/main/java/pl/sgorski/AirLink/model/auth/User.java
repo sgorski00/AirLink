@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import pl.sgorski.AirLink.model.Profile;
 import pl.sgorski.AirLink.model.Reservation;
 
 import java.io.Serializable;
@@ -33,6 +34,11 @@ public class User implements UserDetails, Serializable {
     @JoinColumn(name = "role_id")
     @NotNull(message = "Role is required")
     private Role role;
+
+    @OneToOne(optional = false, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "profile_id")
+    @NotNull(message = "Profile is required")
+    private Profile profile;
 
     @CreationTimestamp
     @Column(updatable = false)

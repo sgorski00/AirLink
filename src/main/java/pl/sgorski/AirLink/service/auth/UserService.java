@@ -3,6 +3,7 @@ package pl.sgorski.AirLink.service.auth;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.sgorski.AirLink.model.auth.User;
@@ -24,6 +25,14 @@ public class UserService {
         log.debug("Saving new user {}", user);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
+    }
+
+    @Cacheable(value = "users", key = "#email")
+    public User findByEmail(String email) {
+        log.debug("Fetching user by email: {}", email);
+        return userRepository.findByEmail(email).orElseThrow(
+                () -> new NoSuchElementException("User not found with email: " + email)
+        );
     }
 
     public long count() {

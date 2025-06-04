@@ -22,7 +22,7 @@ public class FlightController {
     private final FlightMapper flightMapper;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<FlightResponse>>> getFlights() {
+    public ResponseEntity<?> getFlights() {
         List<FlightResponse> flights = flightService.findAll().stream()
                 .map(flightMapper::toResponse)
                 .toList();
@@ -30,7 +30,7 @@ public class FlightController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<ApiResponse<FlightResponse>> getFlightById(
+    public ResponseEntity<?> getFlightById(
             @PathVariable Long id
     ) {
         FlightResponse flightResponse = flightMapper.toResponse(flightService.findById(id));
@@ -38,7 +38,7 @@ public class FlightController {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<ApiResponse<FlightResponse>> deleteFlight(
+    public ResponseEntity<?> deleteFlight(
             @PathVariable Long id
     ) {
         FlightResponse deletedFLight = flightMapper.toResponse(flightService.deleteFlightById(id));
@@ -46,7 +46,7 @@ public class FlightController {
     }
 
     @PutMapping("/restore/{id}")
-    public ResponseEntity<ApiResponse<FlightResponse>> restoreFlight(
+    public ResponseEntity<?> restoreFlight(
             @PathVariable Long id
     ) {
         FlightResponse restoredFlight = flightMapper.toResponse(flightService.restoreById(id));
@@ -54,7 +54,7 @@ public class FlightController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<ApiResponse<FlightResponse>> updateFlight(
+    public ResponseEntity<?> updateFlight(
             @PathVariable Long id,
             @Valid @RequestBody FlightRequest flightRequest
     ) {
@@ -65,7 +65,7 @@ public class FlightController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<FlightResponse>> createFlight(
+    public ResponseEntity<?> createFlight(
             @Valid @RequestBody FlightRequest flightRequest
     ) {
         Flight flight = flightMapper.toFlight(flightRequest);
