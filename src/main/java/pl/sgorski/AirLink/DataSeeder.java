@@ -98,6 +98,13 @@ public class DataSeeder implements ApplicationRunner {
 
         for(int i = 0; i < 100; i++) {
             profile = new Profile();
+            profile.setFirstName(faker.name().firstName());
+            profile.setLastName(faker.name().lastName());
+            profile.setPhoneNumber(faker.phoneNumber().phoneNumber());
+            profile.setZip(faker.address().zipCode());
+            profile.setCity(faker.address().city());
+            profile.setStreet(faker.address().streetAddress());
+            profile.setCountry(faker.address().country());
             profileService.save(profile);
             user = new User();
             user.setProfile(profile);

@@ -23,6 +23,8 @@ public class FlightController {
 
     @GetMapping
     public ResponseEntity<?> getFlights() {
+        //TODO: Add controller for airports and airplanes
+        //TODO: Add pagination and filtering
         List<FlightResponse> flights = flightService.findAll().stream()
                 .map(flightMapper::toResponse)
                 .toList();

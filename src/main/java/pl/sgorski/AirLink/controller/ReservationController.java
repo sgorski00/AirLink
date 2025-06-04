@@ -6,13 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.sgorski.AirLink.dto.ApiResponse;
 import pl.sgorski.AirLink.dto.NewReservationRequest;
-import pl.sgorski.AirLink.dto.ReservationResponse;
 import pl.sgorski.AirLink.dto.UpdateReservationRequest;
 import pl.sgorski.AirLink.mapper.ReservationMapper;
 import pl.sgorski.AirLink.model.Reservation;
 import pl.sgorski.AirLink.service.ReservationService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -24,6 +21,8 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<?> getReservations() {
+        //TODO: Add reservation only for logged user or leave as it is for admin
+        //TODO: Add pagination and filtering
         return ResponseEntity.ok(new ApiResponse<>(
             "Reservations found",
             200,
