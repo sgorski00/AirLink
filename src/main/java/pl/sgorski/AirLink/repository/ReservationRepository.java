@@ -17,6 +17,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @NonNull
     List<Reservation> findAll();
 
+    @Query("SELECT r FROM Reservation r WHERE r.user.id = :userId AND r.deletedAt IS NULL")
+    List<Reservation> findAllByUserId(Long userId);
+
     @Override
     @Query("SELECT r FROM Reservation r WHERE r.id = :id AND r.deletedAt IS NULL")
     @NonNull

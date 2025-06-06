@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import pl.sgorski.AirLink.model.Ownable;
 import pl.sgorski.AirLink.model.Profile;
 import pl.sgorski.AirLink.model.Reservation;
 
@@ -60,5 +61,9 @@ public class User implements UserDetails, Serializable {
     @Override
     public String getUsername() {
         return this.email;
+    }
+
+    public boolean haveAccess(Ownable ownableObject) {
+        return ownableObject.getOwnerId().equals(this.id) || this.role.isAdmin();
     }
 }

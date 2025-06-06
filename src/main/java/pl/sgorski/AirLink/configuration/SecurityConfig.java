@@ -3,6 +3,7 @@ package pl.sgorski.AirLink.configuration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -29,7 +30,14 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers(HttpMethod.GET, "/api/flights/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/flights/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/flights/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/flights/**").hasRole("ADMIN")
+                        .requestMatchers("/api/reservations/restore/**").hasRole("ADMIN")
+                        .requestMatchers("/api/reservations/**").authenticated()
+                        .requestMatchers("/api/profile/**").authenticated()
+                        .anyRequest().denyAll())
                 .userDetailsService(userDetailsService)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -38,12 +46,7 @@ public class SecurityConfig {
 
     @Bean
     PasswordEncoder passwordEncoder() {
-        int saltLength = 16;
-        int hashLength = 16;
-        int parallelism = 1;
-        int memory = 65536;
-        int iterations = 2;
-        return new Argon2PasswordEncoder(saltLength, hashLength, parallelism, memory, iterations);
+        return new Argon2PasswordEncoder(16, 16, 1, 65536, 2);
     }
 
     @Bean

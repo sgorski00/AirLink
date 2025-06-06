@@ -5,7 +5,9 @@ import org.springframework.stereotype.Service;
 import pl.sgorski.AirLink.dto.UpdateReservationRequest;
 import pl.sgorski.AirLink.model.Reservation;
 import pl.sgorski.AirLink.model.ReservationStatus;
+import pl.sgorski.AirLink.model.auth.User;
 import pl.sgorski.AirLink.repository.ReservationRepository;
+import pl.sgorski.AirLink.service.auth.UserService;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -17,6 +19,7 @@ import java.util.NoSuchElementException;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final UserService userService;
 
     public Reservation save(Reservation reservation) {
         if(!reservation.getFlight().isAvailableToBook(reservation.getNumberOfSeats())){
@@ -63,5 +66,15 @@ public class ReservationService {
             throw new IllegalArgumentException("Invalid status provided: " + request.getStatus());
         }
         return save(reservation);
+    }
+
+    public List<Reservation> findAllByUserId(Long id) {
+        return reservationRepository.findAllByUserId(id);
+    }
+
+    public boolean haveAccessByEmail(Long reservationId, String requesterEmail) {
+        Reservation reservation = findById(reservationId);
+        User user = userService.findByEmail(requesterEmail);
+        return user.haveAccess(reservation);
     }
 }
