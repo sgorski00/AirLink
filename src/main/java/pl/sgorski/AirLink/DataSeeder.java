@@ -7,18 +7,12 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import pl.sgorski.AirLink.model.Airplane;
-import pl.sgorski.AirLink.model.Airport;
-import pl.sgorski.AirLink.model.Flight;
-import pl.sgorski.AirLink.model.Reservation;
+import pl.sgorski.AirLink.model.*;
 import pl.sgorski.AirLink.model.auth.Role;
 import pl.sgorski.AirLink.model.auth.User;
 import pl.sgorski.AirLink.model.localization.City;
 import pl.sgorski.AirLink.model.localization.Country;
-import pl.sgorski.AirLink.service.AirplaneService;
-import pl.sgorski.AirLink.service.AirportService;
-import pl.sgorski.AirLink.service.FlightService;
-import pl.sgorski.AirLink.service.ReservationService;
+import pl.sgorski.AirLink.service.*;
 import pl.sgorski.AirLink.service.auth.RoleService;
 import pl.sgorski.AirLink.service.auth.UserService;
 import pl.sgorski.AirLink.service.localization.CityService;
@@ -41,6 +35,7 @@ public class DataSeeder implements ApplicationRunner {
     private final AirplaneService airplaneService;
     private final AirportService airportService;
     private final ReservationService reservationService;
+    private final ProfileService profileService;
 
     private final Faker faker = new Faker();
 
@@ -53,6 +48,7 @@ public class DataSeeder implements ApplicationRunner {
         List<City> cities = initCities();
         List<Flight> flights = initFlights(cities);
         List<Reservation> reservations = initReservations(users, flights);
+        log.info("Initialization complete.");
     }
 
     private List<Reservation> initReservations(List<User> users, List<Flight> flights) {
@@ -61,16 +57,15 @@ public class DataSeeder implements ApplicationRunner {
         List<Reservation> reservations = new ArrayList<>();
 
         for(int i = 0; i<200; i++) {
+            Flight flight = faker.options().nextElement(flights);
+            int numberOfSeats = faker.number().numberBetween(1, 5);
+            if(!flight.isAvailableToBook(numberOfSeats)) continue;
+
             Reservation reservation = new Reservation();
-            reservation.setFlight(faker.options().nextElement(flights));
+            reservation.setFlight(flight);
             reservation.setUser(faker.options().nextElement(users));
-            reservation.setNumberOfSeats(faker.number().numberBetween(1, 5));
-            try {
-                reservations.add(reservationService.save(reservation));
-            }catch (Exception e) {
-                log.error("Error saving reservation: {}", e.getMessage());
-                log.info("Reservation details: {}", reservation);
-            }
+            reservation.setNumberOfSeats(numberOfSeats);
+            reservations.add(reservationService.save(reservation));
         }
 
         return reservations;
@@ -97,10 +92,22 @@ public class DataSeeder implements ApplicationRunner {
         user.setEmail("admin@sg.com");
         user.setPassword("password123");
         user.setRole(roles.get(1));
+        Profile profile = profileService.save(new Profile());
+        user.setProfile(profile);
         users.add(userService.save(user));
 
         for(int i = 0; i < 100; i++) {
+            profile = new Profile();
+            profile.setFirstName(faker.name().firstName());
+            profile.setLastName(faker.name().lastName());
+            profile.setPhoneNumber(faker.phoneNumber().phoneNumber());
+            profile.setZip(faker.address().zipCode());
+            profile.setCity(faker.address().city());
+            profile.setStreet(faker.address().streetAddress());
+            profile.setCountry(faker.address().country());
+            profileService.save(profile);
             user = new User();
+            user.setProfile(profile);
             user.setEmail(faker.internet().emailAddress());
             user.setPassword("password123");
             user.setRole(roles.getFirst());

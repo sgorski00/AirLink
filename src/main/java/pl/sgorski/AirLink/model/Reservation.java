@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 @Entity
 @Table(name = "reservations")
 @Data
-public class Reservation {
+public class Reservation implements Ownable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,4 +37,9 @@ public class Reservation {
     private Timestamp updatedAt;
 
     private Timestamp deletedAt;
+
+    @Override
+    public Long getOwnerId() {
+        return user.getId();
+    }
 }

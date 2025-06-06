@@ -25,4 +25,8 @@ public class Role implements GrantedAuthority, Serializable {
     public String getAuthority() {
         return this.name;
     }
+
+    public boolean isAdmin() {
+        return "ADMIN".equalsIgnoreCase(this.name);
+    }
 }

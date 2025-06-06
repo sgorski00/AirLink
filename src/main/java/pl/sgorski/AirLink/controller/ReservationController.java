@@ -3,15 +3,18 @@ package pl.sgorski.AirLink.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 import pl.sgorski.AirLink.dto.ApiResponse;
 import pl.sgorski.AirLink.dto.NewReservationRequest;
-import pl.sgorski.AirLink.dto.ReservationResponse;
 import pl.sgorski.AirLink.dto.UpdateReservationRequest;
 import pl.sgorski.AirLink.mapper.ReservationMapper;
 import pl.sgorski.AirLink.model.Reservation;
+import pl.sgorski.AirLink.model.auth.User;
 import pl.sgorski.AirLink.service.ReservationService;
+import pl.sgorski.AirLink.service.auth.UserService;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -19,15 +22,23 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReservationController {
 
+    private final UserService userService;
     private final ReservationService reservationService;
     private final ReservationMapper mapper;
 
     @GetMapping
-    public ResponseEntity<?> getReservations() {
+    public ResponseEntity<?> getReservations(
+            Principal principal
+    ) {
+        //TODO: Add pagination and filtering
+        User user = userService.findByEmail(principal.getName());
+        List<Reservation> reservations = user.getRole().isAdmin() ?
+                reservationService.findAll() :
+                reservationService.findAllByUserId(user.getId());
         return ResponseEntity.ok(new ApiResponse<>(
-            "Reservations found",
+            reservations.isEmpty() ? "There is no any reservation" :"Reservations found",
             200,
-            reservationService.findAll().stream()
+            reservations.stream()
                 .map(mapper::toResponse)
                 .toList()
         ));
@@ -35,8 +46,10 @@ public class ReservationController {
 
     @GetMapping("{id}")
     public ResponseEntity<?> getReservationById(
-            @PathVariable Long id
+            @PathVariable Long id,
+            Principal principal
     ) {
+        if(!reservationService.haveAccessByEmail(id, principal.getName())) throw new AccessDeniedException("You do not have access to this reservation");
         return ResponseEntity.ok(new ApiResponse<>(
             "Reservation found",
             200,
@@ -58,8 +71,10 @@ public class ReservationController {
     @PutMapping("{id}")
     public ResponseEntity<?> updateReservation(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateReservationRequest request
+            @Valid @RequestBody UpdateReservationRequest request,
+            Principal principal
     ) {
+        if(!reservationService.haveAccessByEmail(id, principal.getName())) throw new AccessDeniedException("You do not have access to this reservation");
         Reservation updated = reservationService.updateReservationById(id, request);
         return ResponseEntity.ok(new ApiResponse<>(
             "Reservation updated",
@@ -70,8 +85,10 @@ public class ReservationController {
 
     @DeleteMapping("{id}")
     public ResponseEntity<?> deleteReservation(
-            @PathVariable Long id
+            @PathVariable Long id,
+            Principal principal
     ) {
+        if(!reservationService.haveAccessByEmail(id, principal.getName())) throw new AccessDeniedException("You do not have access to this reservation");
         return ResponseEntity.ok(new ApiResponse<>(
             "Reservation deleted",
             200,

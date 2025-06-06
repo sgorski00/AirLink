@@ -13,6 +13,7 @@ import pl.sgorski.AirLink.dto.LoginResponse;
 import pl.sgorski.AirLink.dto.RegisterRequest;
 import pl.sgorski.AirLink.dto.RegisterResponse;
 import pl.sgorski.AirLink.mapper.RegistrationMapper;
+import pl.sgorski.AirLink.model.Profile;
 import pl.sgorski.AirLink.model.auth.Role;
 import pl.sgorski.AirLink.model.auth.User;
 import pl.sgorski.AirLink.service.auth.AuthenticationService;
@@ -39,6 +40,9 @@ public class AuthenticationServiceTests {
 
     @Mock
     private RoleService roleService;
+
+    @Mock
+    private ProfileService profileService;
 
     @Mock
     private UserDetailsService userDetailsService;
@@ -96,7 +100,9 @@ public class AuthenticationServiceTests {
 
     @Test
     void shouldRegisterUser() {
+        Profile profile = new Profile();
         user.setPassword("pass");
+        when(profileService.save(any(Profile.class))).thenReturn(profile);
         when(roleService.findByName(anyString())).thenReturn(role);
         when(mapper.toUser(any(RegisterRequest.class), any(Role.class))).thenReturn(user);
         when(mapper.toResponse(any(User.class))).thenReturn(new RegisterResponse());
@@ -106,5 +112,6 @@ public class AuthenticationServiceTests {
 
         assertNotNull(response);
         verify(userService, times(1)).save(any(User.class));
+        verify(profileService, times(1)).save(any(Profile.class));
     }
 }

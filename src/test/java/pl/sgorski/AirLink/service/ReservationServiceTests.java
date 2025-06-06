@@ -14,6 +14,7 @@ import pl.sgorski.AirLink.repository.ReservationRepository;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -158,5 +159,15 @@ public class ReservationServiceTests {
         assertThrows(NullPointerException.class, () -> reservationService.updateReservationById(1L, updateRequest));
 
         verify(reservationRepository, never()).save(any(Reservation.class));
+    }
+
+    @Test
+    void shouldReturnAllReservationsByUserId() {
+        when(reservationRepository.findAllByUserId(anyLong())).thenReturn(List.of(reservation));
+
+        List<Reservation> reservations = reservationService.findAllByUserId(1L);
+
+        assertFalse(reservations.isEmpty());
+        verify(reservationRepository, times(1)).findAllByUserId(1L);
     }
 }

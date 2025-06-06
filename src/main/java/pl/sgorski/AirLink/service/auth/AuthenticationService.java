@@ -12,8 +12,10 @@ import pl.sgorski.AirLink.dto.LoginResponse;
 import pl.sgorski.AirLink.dto.RegisterRequest;
 import pl.sgorski.AirLink.dto.RegisterResponse;
 import pl.sgorski.AirLink.mapper.RegistrationMapper;
+import pl.sgorski.AirLink.model.Profile;
 import pl.sgorski.AirLink.model.auth.Role;
 import pl.sgorski.AirLink.model.auth.User;
+import pl.sgorski.AirLink.service.ProfileService;
 
 @Log4j2
 @Service
@@ -25,6 +27,7 @@ public class AuthenticationService {
     private final UserService userService;
     private final UserDetailsService userDetailsService;
     private final RoleService roleService;
+    private final ProfileService profileService;
     private final RegistrationMapper registrationMapper;
 
     public LoginResponse authenticate(LoginRequest request) {
@@ -38,9 +41,12 @@ public class AuthenticationService {
 
     public RegisterResponse register(RegisterRequest request) {
         Role defaultRole = roleService.findByName("USER");
+        Profile profile = new Profile();
+        profile = profileService.save(profile);
         log.debug("Found role: {}", defaultRole.getName());
         User user = registrationMapper.toUser(request, defaultRole);
-        log.debug("Registering user: {}", user);
+        user.setProfile(profile);
+        log.debug("Registering user with empty profile: {}", user);
         User savedUser = userService.save(user);
         log.info("User registered successfully: {}", savedUser.getEmail());
         return registrationMapper.toResponse(savedUser);
