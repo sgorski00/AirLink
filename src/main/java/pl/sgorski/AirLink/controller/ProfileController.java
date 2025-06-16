@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.sgorski.AirLink.dto.ApiResponse;
+import pl.sgorski.AirLink.dto.ResponseDto;
 import pl.sgorski.AirLink.dto.ProfileRequest;
 import pl.sgorski.AirLink.mapper.ProfileMapper;
 import pl.sgorski.AirLink.model.Profile;
@@ -27,7 +27,7 @@ public class ProfileController {
             Principal principal
     ) {
         Profile profile = userService.findByEmail(principal.getName()).getProfile();
-        return ResponseEntity.ok(new ApiResponse<>(
+        return ResponseEntity.ok(new ResponseDto<>(
                 "Profile retrieved successfully",
                 200,
                 profileMapper.toResponse(profile))
@@ -42,7 +42,7 @@ public class ProfileController {
         Profile existingProfile = userService.findByEmail(principal.getName()).getProfile();
         profileMapper.updateProfile(request, existingProfile);
         Profile profile = profileService.save(existingProfile);
-        return ResponseEntity.ok(new ApiResponse<>(
+        return ResponseEntity.ok(new ResponseDto<>(
                 "Profile updated successfully",
                 200,
                 profileMapper.toResponse(profile))
@@ -56,7 +56,7 @@ public class ProfileController {
         Profile profile = userService.findByEmail(principal.getName()).getProfile();
         profile.clear();
         profile = profileService.save(profile);
-        return ResponseEntity.ok(new ApiResponse<>(
+        return ResponseEntity.ok(new ResponseDto<>(
                 "Profile cleared successfully",
                 200,
                 profileMapper.toResponse(profile))

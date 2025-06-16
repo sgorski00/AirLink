@@ -29,7 +29,7 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/docs/**", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/flights/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/flights/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/flights/**").hasRole("ADMIN")

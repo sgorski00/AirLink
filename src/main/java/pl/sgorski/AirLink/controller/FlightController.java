@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.sgorski.AirLink.dto.ApiResponse;
+import pl.sgorski.AirLink.dto.ResponseDto;
 import pl.sgorski.AirLink.dto.FlightRequest;
 import pl.sgorski.AirLink.dto.FlightResponse;
 import pl.sgorski.AirLink.mapper.FlightMapper;
@@ -28,7 +28,7 @@ public class FlightController {
         List<FlightResponse> flights = flightService.findAll().stream()
                 .map(flightMapper::toResponse)
                 .toList();
-        return ResponseEntity.ok(new ApiResponse<>("Flights", 200, flights));
+        return ResponseEntity.ok(new ResponseDto<>("Flights", 200, flights));
     }
 
     @GetMapping("{id}")
@@ -36,7 +36,7 @@ public class FlightController {
             @PathVariable Long id
     ) {
         FlightResponse flightResponse = flightMapper.toResponse(flightService.findById(id));
-        return ResponseEntity.ok(new ApiResponse<>("Flight found", 200, flightResponse));
+        return ResponseEntity.ok(new ResponseDto<>("Flight found", 200, flightResponse));
     }
 
     @DeleteMapping("{id}")
@@ -44,7 +44,7 @@ public class FlightController {
             @PathVariable Long id
     ) {
         FlightResponse deletedFLight = flightMapper.toResponse(flightService.deleteFlightById(id));
-        return ResponseEntity.ok(new ApiResponse<>("Flight deleted", 200, deletedFLight));
+        return ResponseEntity.ok(new ResponseDto<>("Flight deleted", 200, deletedFLight));
     }
 
     @PutMapping("/restore/{id}")
@@ -52,7 +52,7 @@ public class FlightController {
             @PathVariable Long id
     ) {
         FlightResponse restoredFlight = flightMapper.toResponse(flightService.restoreById(id));
-        return ResponseEntity.ok(new ApiResponse<>("Flight restored", 200, restoredFlight));
+        return ResponseEntity.ok(new ResponseDto<>("Flight restored", 200, restoredFlight));
     }
 
     @PutMapping("{id}")
@@ -63,7 +63,7 @@ public class FlightController {
         Flight existingFlight = flightService.findById(id);
         flightMapper.updateFlight(flightRequest, existingFlight);
         FlightResponse updatedFlight = flightMapper.toResponse(flightService.save(existingFlight));
-        return ResponseEntity.ok(new ApiResponse<>("Flight updated", 200, updatedFlight));
+        return ResponseEntity.ok(new ResponseDto<>("Flight updated", 200, updatedFlight));
     }
 
     @PostMapping
@@ -72,6 +72,6 @@ public class FlightController {
     ) {
         Flight flight = flightMapper.toFlight(flightRequest);
         FlightResponse createdFlight = flightMapper.toResponse(flightService.save(flight));
-        return ResponseEntity.status(201).body(new ApiResponse<>("Flight created", 201, createdFlight));
+        return ResponseEntity.status(201).body(new ResponseDto<>("Flight created", 201, createdFlight));
     }
 }
