@@ -10,11 +10,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import pl.sgorski.AirLink.dto.UpdateReservationRequest;
 import pl.sgorski.AirLink.model.Flight;
 import pl.sgorski.AirLink.model.Reservation;
 import pl.sgorski.AirLink.model.ReservationStatus;
+import pl.sgorski.AirLink.model.auth.Role;
+import pl.sgorski.AirLink.model.auth.User;
 import pl.sgorski.AirLink.repository.ReservationRepository;
+import pl.sgorski.AirLink.service.auth.UserService;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -31,6 +37,9 @@ public class ReservationServiceTests {
 
     @Mock
     private ReservationRepository reservationRepository;
+
+    @Mock
+    private UserService userService;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -166,11 +175,23 @@ public class ReservationServiceTests {
     }
 
     @Test
-    void shouldReturnAllReservationsByUserId() {
+    void shouldReturnAllReservationsForUser() {
+        User user = new User();
+        Role role = new Role();
+        role.setName("USER");
+        user.setRole(role);
+        user.setId(1L);
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getName()).thenReturn("test@test.com");
+        SecurityContext context = mock(SecurityContext.class);
+        when(context.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(context);
+
         Page<Reservation> page = new PageImpl<>(List.of(reservation));
         when(reservationRepository.findAllByUserId(anyLong(), any(Pageable.class))).thenReturn(page);
+        when(userService.findByEmail(anyString())).thenReturn(user);
 
-        Page<Reservation> reservations = reservationService.findAllByUserId(1L, PageRequest.of(0, 10));
+        Page<Reservation> reservations = reservationService.findAll(PageRequest.of(0, 10));
 
         assertFalse(reservations.getContent().isEmpty());
         verify(reservationRepository, times(1)).findAllByUserId(anyLong(), any(Pageable.class));
