@@ -2,8 +2,8 @@ package pl.sgorski.AirLink.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import pl.sgorski.AirLink.dto.RegisterRequest;
-import pl.sgorski.AirLink.dto.RegisterResponse;
+import pl.sgorski.AirLink.dto.auth.RegisterRequest;
+import pl.sgorski.AirLink.dto.auth.RegisterResponse;
 import pl.sgorski.AirLink.model.auth.Role;
 import pl.sgorski.AirLink.model.auth.User;
 

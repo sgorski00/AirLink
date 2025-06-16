@@ -64,8 +64,10 @@ public class Flight implements Serializable {
     }
 
     public boolean isAvailableToBook(int numberOfSeats) {
-        return deletedAt == null
-                && departure.isAfter(LocalDateTime.now())
-                && hasAvailableSeats(numberOfSeats);
+        return isActive() && hasAvailableSeats(numberOfSeats);
+    }
+
+    public boolean isActive() {
+        return deletedAt == null && departure.isAfter(LocalDateTime.now());
     }
 }

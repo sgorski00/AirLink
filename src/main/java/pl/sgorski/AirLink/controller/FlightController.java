@@ -1,37 +1,61 @@
 package pl.sgorski.AirLink.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.sgorski.AirLink.dto.ResponseDto;
+import pl.sgorski.AirLink.dto.generic.PaginationResponseDto;
+import pl.sgorski.AirLink.dto.generic.ResponseDto;
 import pl.sgorski.AirLink.dto.FlightRequest;
 import pl.sgorski.AirLink.dto.FlightResponse;
 import pl.sgorski.AirLink.mapper.FlightMapper;
 import pl.sgorski.AirLink.model.Flight;
 import pl.sgorski.AirLink.service.FlightService;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/flights")
 @RequiredArgsConstructor
+@Tag(name = "Flights", description = "Endpoints for managing flights")
 public class FlightController {
 
     private final FlightService flightService;
     private final FlightMapper flightMapper;
 
     @GetMapping
-    public ResponseEntity<?> getFlights() {
-        //TODO: Add controller for airports and airplanes
-        //TODO: Add pagination and filtering
-        List<FlightResponse> flights = flightService.findAll().stream()
-                .map(flightMapper::toResponse)
-                .toList();
-        return ResponseEntity.ok(new ResponseDto<>("Flights", 200, flights));
+    @Operation(summary = "Get all flights", description = "Retrieve a paginated list of all flights")
+    @ApiResponse(responseCode = "200", description = "Flights found", content = @Content(schema = @Schema(implementation = PaginationResponseDto.class)))
+    public ResponseEntity<?> getFlights(
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "departure") String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String sortDir,
+            @RequestParam(required = false) Long airportFrom,
+            @RequestParam(required = false) Long airportTo
+    ) {
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
+        PageRequest pageRequest = PageRequest.of(page - 1, size, sort);
+        Page<Flight> flights = flightService.findAllActivePaginated(pageRequest, airportFrom, airportTo);
+        if(flights.isEmpty()) return ResponseEntity.ok(new PaginationResponseDto("Flights", 200, Page.empty()));
+        Page<FlightResponse> flightsResponse = flights.map(flightMapper::toResponse);
+        return ResponseEntity.ok(new PaginationResponseDto("Flights", 200, flightsResponse));
     }
 
     @GetMapping("{id}")
+    @Operation(summary = "Get flight by ID", description = "Retrieve a flight by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Flight found", content = @Content(schema = @Schema(implementation = FlightResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Flight not found", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     public ResponseEntity<?> getFlightById(
             @PathVariable Long id
     ) {
@@ -40,6 +64,11 @@ public class FlightController {
     }
 
     @DeleteMapping("{id}")
+    @Operation(summary = "Delete flight by ID", description = "Soft delete a flight by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Flight deleted", content = @Content(schema = @Schema(implementation = FlightResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Flight not found", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     public ResponseEntity<?> deleteFlight(
             @PathVariable Long id
     ) {
@@ -48,6 +77,11 @@ public class FlightController {
     }
 
     @PutMapping("/restore/{id}")
+    @Operation(summary = "Restore flight by ID", description = "Restore a soft-deleted flight by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Flight restored", content = @Content(schema = @Schema(implementation = FlightResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Flight not found", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     public ResponseEntity<?> restoreFlight(
             @PathVariable Long id
     ) {
@@ -56,6 +90,11 @@ public class FlightController {
     }
 
     @PutMapping("{id}")
+    @Operation(summary = "Update flight by ID", description = "Update a flight by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Flight updated", content = @Content(schema = @Schema(implementation = FlightResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Flight not found", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     public ResponseEntity<?> updateFlight(
             @PathVariable Long id,
             @Valid @RequestBody FlightRequest flightRequest
@@ -67,6 +106,11 @@ public class FlightController {
     }
 
     @PostMapping
+    @Operation(summary = "Create a new flight", description = "Create a new flight with the provided details")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Flight created successfully", content = @Content(schema = @Schema(implementation = FlightResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     public ResponseEntity<?> createFlight(
             @Valid @RequestBody FlightRequest flightRequest
     ) {

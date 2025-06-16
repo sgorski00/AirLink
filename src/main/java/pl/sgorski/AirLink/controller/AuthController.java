@@ -14,7 +14,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pl.sgorski.AirLink.dto.*;
+import pl.sgorski.AirLink.dto.auth.LoginRequest;
+import pl.sgorski.AirLink.dto.auth.LoginResponse;
+import pl.sgorski.AirLink.dto.auth.RegisterRequest;
+import pl.sgorski.AirLink.dto.auth.RegisterResponse;
+import pl.sgorski.AirLink.dto.generic.ResponseDto;
 import pl.sgorski.AirLink.service.auth.AuthenticationService;
 
 @RestController

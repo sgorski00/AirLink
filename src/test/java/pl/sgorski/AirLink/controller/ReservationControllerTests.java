@@ -5,6 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import pl.sgorski.AirLink.dto.NewReservationRequest;
@@ -60,7 +64,8 @@ public class ReservationControllerTests {
         user.setRole(role);
         when(role.isAdmin()).thenReturn(true);
         when(userService.findByEmail(anyString())).thenReturn(user);
-        when(reservationService.findAll()).thenReturn(List.of(new Reservation()));
+        Page<Reservation> reservations = new PageImpl<>(List.of(new Reservation()));
+        when(reservationService.findAll(any(PageRequest.class))).thenReturn(reservations);
 
         mockMvc.perform(get("/api/reservations")
                         .principal(() -> "admin"))
@@ -69,7 +74,7 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.data").isArray());
 
-        verify(reservationService, times(1)).findAll();
+        verify(reservationService, times(1)).findAll(any(Pageable.class));
     }
 
     @Test
@@ -79,7 +84,7 @@ public class ReservationControllerTests {
         user.setId(1L);
         when(role.isAdmin()).thenReturn(false);
         when(userService.findByEmail(anyString())).thenReturn(user);
-        when(reservationService.findAllByUserId(anyLong())).thenReturn(List.of());
+        when(reservationService.findAllByUserId(anyLong(), any(Pageable.class))).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/reservations")
                         .principal(() -> "user"))
@@ -88,7 +93,7 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.data").isArray());
 
-        verify(reservationService, times(1)).findAllByUserId(anyLong());
+        verify(reservationService, times(1)).findAllByUserId(anyLong(), any(Pageable.class));
     }
 
     @Test
@@ -98,7 +103,8 @@ public class ReservationControllerTests {
         user.setId(1L);
         when(role.isAdmin()).thenReturn(false);
         when(userService.findByEmail(anyString())).thenReturn(user);
-        when(reservationService.findAllByUserId(anyLong())).thenReturn(List.of(new Reservation()));
+        Page<Reservation> reservations = new PageImpl<>(List.of(new Reservation()));
+        when(reservationService.findAllByUserId(anyLong(), any(Pageable.class))).thenReturn(reservations);
 
         mockMvc.perform(get("/api/reservations")
                         .principal(() -> "user"))
@@ -107,7 +113,7 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.data").isArray());
 
-        verify(reservationService, times(1)).findAllByUserId(anyLong());
+        verify(reservationService, times(1)).findAllByUserId(anyLong(), any(Pageable.class));
     }
 
     @Test

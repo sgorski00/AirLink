@@ -2,10 +2,13 @@ package pl.sgorski.AirLink.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
-import pl.sgorski.AirLink.dto.ResponseDto;
+import pl.sgorski.AirLink.dto.generic.ResponseDto;
 import pl.sgorski.AirLink.dto.NewReservationRequest;
 import pl.sgorski.AirLink.dto.UpdateReservationRequest;
 import pl.sgorski.AirLink.mapper.ReservationMapper;
@@ -28,13 +31,18 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<?> getReservations(
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
+            @RequestParam(required = false, defaultValue = "desc") String sortDir,
             Principal principal
     ) {
-        //TODO: Add pagination and filtering
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
+        PageRequest pageRequest = PageRequest.of(page - 1, size, sort);
         User user = userService.findByEmail(principal.getName());
-        List<Reservation> reservations = user.getRole().isAdmin() ?
-                reservationService.findAll() :
-                reservationService.findAllByUserId(user.getId());
+        Page<Reservation> reservations = user.getRole().isAdmin() ?
+                reservationService.findAll(pageRequest) :
+                reservationService.findAllByUserId(user.getId(), pageRequest);
         return ResponseEntity.ok(new ResponseDto<>(
             reservations.isEmpty() ? "There is no any reservation" :"Reservations found",
             200,
