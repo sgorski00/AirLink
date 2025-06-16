@@ -17,11 +17,8 @@ import pl.sgorski.AirLink.dto.UpdateReservationRequest;
 import pl.sgorski.AirLink.mapper.ReservationMapper;
 import pl.sgorski.AirLink.model.Reservation;
 import pl.sgorski.AirLink.model.ReservationStatus;
-import pl.sgorski.AirLink.model.auth.Role;
-import pl.sgorski.AirLink.model.auth.User;
 import pl.sgorski.AirLink.service.ReservationService;
 import pl.sgorski.AirLink.service.auth.JwtService;
-import pl.sgorski.AirLink.service.auth.UserService;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -50,20 +47,10 @@ public class ReservationControllerTests {
     private ReservationService reservationService;
 
     @MockitoBean
-    private UserService userService;
-
-    @MockitoBean
-    private Role role;
-
-    @MockitoBean
     private JwtService jwtService;
 
     @Test
     void shouldReturnAllReservations() throws Exception {
-        User user = new User();
-        user.setRole(role);
-        when(role.isAdmin()).thenReturn(true);
-        when(userService.findByEmail(anyString())).thenReturn(user);
         Page<Reservation> reservations = new PageImpl<>(List.of(new Reservation()));
         when(reservationService.findAll(any(PageRequest.class))).thenReturn(reservations);
 
@@ -79,12 +66,7 @@ public class ReservationControllerTests {
 
     @Test
     void shouldReturnEmptyListForLoggedUser() throws Exception {
-        User user = new User();
-        user.setRole(role);
-        user.setId(1L);
-        when(role.isAdmin()).thenReturn(false);
-        when(userService.findByEmail(anyString())).thenReturn(user);
-        when(reservationService.findAllByUserId(anyLong(), any(Pageable.class))).thenReturn(Page.empty());
+        when(reservationService.findAll(any(Pageable.class))).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/reservations")
                         .principal(() -> "user"))
@@ -93,18 +75,13 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.data").isArray());
 
-        verify(reservationService, times(1)).findAllByUserId(anyLong(), any(Pageable.class));
+        verify(reservationService, times(1)).findAll(any(Pageable.class));
     }
 
     @Test
     void shouldReturnAllReservationsForLoggedUser() throws Exception {
-        User user = new User();
-        user.setRole(role);
-        user.setId(1L);
-        when(role.isAdmin()).thenReturn(false);
-        when(userService.findByEmail(anyString())).thenReturn(user);
         Page<Reservation> reservations = new PageImpl<>(List.of(new Reservation()));
-        when(reservationService.findAllByUserId(anyLong(), any(Pageable.class))).thenReturn(reservations);
+        when(reservationService.findAll(any(Pageable.class))).thenReturn(reservations);
 
         mockMvc.perform(get("/api/reservations")
                         .principal(() -> "user"))
@@ -113,7 +90,7 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.data").isArray());
 
-        verify(reservationService, times(1)).findAllByUserId(anyLong(), any(Pageable.class));
+        verify(reservationService, times(1)).findAll(any(Pageable.class));
     }
 
     @Test

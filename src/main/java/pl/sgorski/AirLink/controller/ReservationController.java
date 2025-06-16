@@ -1,58 +1,71 @@
 package pl.sgorski.AirLink.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
+import pl.sgorski.AirLink.dto.ReservationResponse;
+import pl.sgorski.AirLink.dto.generic.PaginationResponseDto;
 import pl.sgorski.AirLink.dto.generic.ResponseDto;
 import pl.sgorski.AirLink.dto.NewReservationRequest;
 import pl.sgorski.AirLink.dto.UpdateReservationRequest;
 import pl.sgorski.AirLink.mapper.ReservationMapper;
 import pl.sgorski.AirLink.model.Reservation;
-import pl.sgorski.AirLink.model.auth.User;
 import pl.sgorski.AirLink.service.ReservationService;
-import pl.sgorski.AirLink.service.auth.UserService;
 
 import java.security.Principal;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/reservations")
 @RequiredArgsConstructor
+@Tag(name = "Reservations", description = "Endpoints for managing reservations")
 public class ReservationController {
 
-    private final UserService userService;
     private final ReservationService reservationService;
     private final ReservationMapper mapper;
 
     @GetMapping
+    @Operation(summary = "Get all reservations", description = "Retrieve a paginated list of reservations. Content depeneds on user role. " +
+            "Admin can see all reservations, while user can only see their own reservations.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reservations found", content = @Content(schema = @Schema(implementation = PaginationResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Wrong sorting parameters", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+    })
     public ResponseEntity<?> getReservations(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
-            @RequestParam(required = false, defaultValue = "desc") String sortDir,
-            Principal principal
+            @RequestParam(required = false, defaultValue = "desc") String sortDir
     ) {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
         PageRequest pageRequest = PageRequest.of(page - 1, size, sort);
-        User user = userService.findByEmail(principal.getName());
-        Page<Reservation> reservations = user.getRole().isAdmin() ?
-                reservationService.findAll(pageRequest) :
-                reservationService.findAllByUserId(user.getId(), pageRequest);
-        return ResponseEntity.ok(new ResponseDto<>(
-            reservations.isEmpty() ? "There is no any reservation" :"Reservations found",
-            200,
-            reservations.stream()
-                .map(mapper::toResponse)
-                .toList()
+        Page<Reservation> reservations = reservationService.findAll(pageRequest);
+        Page<ReservationResponse> reservationResponses = reservations.map(mapper::toResponse);
+        return ResponseEntity.ok(new PaginationResponseDto(
+                reservations.isEmpty() ? "There is no any reservation" : "Reservations found",
+                200,
+                reservationResponses
         ));
     }
 
     @GetMapping("{id}")
+    @Operation(summary = "Get reservation by ID", description = "Retrieve a reservation by its ID. Access is restricted to the user who created the reservation or an admin.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reservation found", content = @Content(schema = @Schema(implementation = ReservationResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Reservation not found", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     public ResponseEntity<?> getReservationById(
             @PathVariable Long id,
             Principal principal
@@ -66,6 +79,11 @@ public class ReservationController {
     }
 
     @PostMapping
+    @Operation(summary = "Create a new reservation", description = "Create a new reservation. The user must be authenticated to create a reservation.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Reservation created", content = @Content(schema = @Schema(implementation = ReservationResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     public ResponseEntity<?> createReservation(
             @Valid @RequestBody NewReservationRequest request
     ) {
@@ -77,6 +95,12 @@ public class ReservationController {
     }
 
     @PutMapping("{id}")
+    @Operation(summary = "Update a reservation", description = "Update an existing reservation by its ID. Access is restricted to the user who created the reservation or an admin.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reservation updated", content = @Content(schema = @Schema(implementation = ReservationResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Reservation not found", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     public ResponseEntity<?> updateReservation(
             @PathVariable Long id,
             @Valid @RequestBody UpdateReservationRequest request,
@@ -92,6 +116,12 @@ public class ReservationController {
     }
 
     @DeleteMapping("{id}")
+    @Operation(summary = "Delete a reservation", description = "Delete a reservation by its ID. Access is restricted to the user who created the reservation or an admin.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reservation deleted", content = @Content(schema = @Schema(implementation = ReservationResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Reservation not found", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     public ResponseEntity<?> deleteReservation(
             @PathVariable Long id,
             Principal principal
@@ -105,6 +135,12 @@ public class ReservationController {
     }
 
     @PutMapping("/restore/{id}")
+    @Operation(summary = "Restore a deleted reservation", description = "Restore a reservation that was previously deleted. Access is restricted to the user who created the reservation or an admin.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reservation restored", content = @Content(schema = @Schema(implementation = ReservationResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Reservation not found", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     public ResponseEntity<?> restoreReservation(
             @PathVariable Long id
     ) {

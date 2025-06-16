@@ -3,6 +3,8 @@ package pl.sgorski.AirLink.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import pl.sgorski.AirLink.dto.UpdateReservationRequest;
 import pl.sgorski.AirLink.model.Reservation;
@@ -40,7 +42,11 @@ public class ReservationService {
     }
 
     public Page<Reservation> findAll(Pageable pageable) {
-        return reservationRepository.findAll(pageable);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.findByEmail(authentication.getName());
+        return user.getRole().isAdmin()
+                ? reservationRepository.findAll(pageable)
+                : reservationRepository.findAllByUserId(user.getId(), pageable);
     }
 
     public Reservation deleteById(Long id) {
@@ -72,10 +78,6 @@ public class ReservationService {
             throw new IllegalArgumentException("Invalid status provided: " + request.getStatus());
         }
         return save(reservation);
-    }
-
-    public Page<Reservation> findAllByUserId(Long id, Pageable pageable) {
-        return reservationRepository.findAllByUserId(id, pageable);
     }
 
     public boolean haveAccessByEmail(Long reservationId, String requesterEmail) {
