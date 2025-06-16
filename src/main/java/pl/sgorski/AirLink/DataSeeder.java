@@ -98,13 +98,13 @@ public class DataSeeder implements ApplicationRunner {
 
         for(int i = 0; i < 100; i++) {
             profile = new Profile();
-            profile.setFirstName(faker.name().firstName());
-            profile.setLastName(faker.name().lastName());
-            profile.setPhoneNumber(faker.phoneNumber().phoneNumber());
-            profile.setZip(faker.address().zipCode());
-            profile.setCity(faker.address().city());
-            profile.setStreet(faker.address().streetAddress());
-            profile.setCountry(faker.address().country());
+            profile.setFirstName(trimTo(faker.name().firstName(), 50));
+            profile.setLastName(trimTo(faker.name().lastName(), 50));
+            profile.setPhoneNumber(trimTo(faker.phoneNumber().phoneNumber(), 15));
+            profile.setZip(trimTo(faker.address().zipCode(), 20));
+            profile.setCity(trimTo(faker.address().city(), 50));
+            profile.setStreet(trimTo(faker.address().streetAddress(), 100));
+            profile.setCountry(trimTo(faker.address().country(), 50));
             profileService.save(profile);
             user = new User();
             user.setProfile(profile);
@@ -205,5 +205,10 @@ public class DataSeeder implements ApplicationRunner {
             flightService.save(flight);
         }
         return flights;
+    }
+
+    private static String trimTo(String value, int max) {
+        if (value == null) return null;
+        return value.length() > max ? value.substring(0, max) : value;
     }
 }
