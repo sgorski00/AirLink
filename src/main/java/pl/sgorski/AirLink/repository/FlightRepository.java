@@ -1,8 +1,11 @@
 package pl.sgorski.AirLink.repository;
 
 import lombok.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import pl.sgorski.AirLink.model.Flight;
 
 import java.util.List;
@@ -14,6 +17,13 @@ public interface FlightRepository extends JpaRepository<Flight, Long> {
     @Query("SELECT f FROM Flight f WHERE f.deletedAt IS NULL")
     @Override
     List<Flight> findAll();
+
+    @Query("""
+        SELECT f FROM Flight f WHERE f.deletedAt IS NULL AND f.departure >= CURRENT_TIMESTAMP
+        AND (:airportFrom IS NULL OR f.from.id = :airportFrom)
+        AND (:airportTo IS NULL OR f.to.id = :airportTo)
+    """)
+    Page<Flight> findAllActiveFiltered(Pageable pageable, @Param("airportFrom") Long airportFrom, @Param("airportTo") Long airportTo);
 
     @NonNull
     @Query("SELECT f FROM Flight f WHERE f.deletedAt IS NULL AND f.id = :id")

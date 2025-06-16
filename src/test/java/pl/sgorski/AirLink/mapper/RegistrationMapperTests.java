@@ -3,8 +3,8 @@ package pl.sgorski.AirLink.mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-import pl.sgorski.AirLink.dto.RegisterRequest;
-import pl.sgorski.AirLink.dto.RegisterResponse;
+import pl.sgorski.AirLink.dto.auth.RegisterRequest;
+import pl.sgorski.AirLink.dto.auth.RegisterResponse;
 import pl.sgorski.AirLink.model.auth.Role;
 import pl.sgorski.AirLink.model.auth.User;
 

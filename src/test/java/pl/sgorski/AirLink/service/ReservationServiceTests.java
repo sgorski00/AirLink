@@ -6,6 +6,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import pl.sgorski.AirLink.dto.UpdateReservationRequest;
 import pl.sgorski.AirLink.model.Flight;
 import pl.sgorski.AirLink.model.Reservation;
@@ -163,11 +167,12 @@ public class ReservationServiceTests {
 
     @Test
     void shouldReturnAllReservationsByUserId() {
-        when(reservationRepository.findAllByUserId(anyLong())).thenReturn(List.of(reservation));
+        Page<Reservation> page = new PageImpl<>(List.of(reservation));
+        when(reservationRepository.findAllByUserId(anyLong(), any(Pageable.class))).thenReturn(page);
 
-        List<Reservation> reservations = reservationService.findAllByUserId(1L);
+        Page<Reservation> reservations = reservationService.findAllByUserId(1L, PageRequest.of(0, 10));
 
-        assertFalse(reservations.isEmpty());
-        verify(reservationRepository, times(1)).findAllByUserId(1L);
+        assertFalse(reservations.getContent().isEmpty());
+        verify(reservationRepository, times(1)).findAllByUserId(anyLong(), any(Pageable.class));
     }
 }

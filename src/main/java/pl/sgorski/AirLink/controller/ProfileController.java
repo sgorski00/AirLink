@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.sgorski.AirLink.dto.ProfileResponse;
-import pl.sgorski.AirLink.dto.ResponseDto;
+import pl.sgorski.AirLink.dto.generic.ResponseDto;
 import pl.sgorski.AirLink.dto.ProfileRequest;
 import pl.sgorski.AirLink.mapper.ProfileMapper;
 import pl.sgorski.AirLink.model.Profile;

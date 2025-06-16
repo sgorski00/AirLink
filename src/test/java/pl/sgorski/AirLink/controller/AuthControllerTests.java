@@ -10,10 +10,10 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import pl.sgorski.AirLink.dto.LoginRequest;
-import pl.sgorski.AirLink.dto.LoginResponse;
-import pl.sgorski.AirLink.dto.RegisterRequest;
-import pl.sgorski.AirLink.dto.RegisterResponse;
+import pl.sgorski.AirLink.dto.auth.LoginRequest;
+import pl.sgorski.AirLink.dto.auth.LoginResponse;
+import pl.sgorski.AirLink.dto.auth.RegisterRequest;
+import pl.sgorski.AirLink.dto.auth.RegisterResponse;
 import pl.sgorski.AirLink.service.auth.AuthenticationService;
 import pl.sgorski.AirLink.service.auth.JwtService;
 

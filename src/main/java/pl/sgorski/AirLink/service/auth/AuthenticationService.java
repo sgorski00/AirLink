@@ -7,10 +7,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
-import pl.sgorski.AirLink.dto.LoginRequest;
-import pl.sgorski.AirLink.dto.LoginResponse;
-import pl.sgorski.AirLink.dto.RegisterRequest;
-import pl.sgorski.AirLink.dto.RegisterResponse;
+import pl.sgorski.AirLink.dto.auth.LoginRequest;
+import pl.sgorski.AirLink.dto.auth.LoginResponse;
+import pl.sgorski.AirLink.dto.auth.RegisterRequest;
+import pl.sgorski.AirLink.dto.auth.RegisterResponse;
 import pl.sgorski.AirLink.mapper.RegistrationMapper;
 import pl.sgorski.AirLink.model.Profile;
 import pl.sgorski.AirLink.model.auth.Role;

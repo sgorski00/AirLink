@@ -1,4 +1,4 @@
-package pl.sgorski.AirLink.dto;
+package pl.sgorski.AirLink.dto.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
