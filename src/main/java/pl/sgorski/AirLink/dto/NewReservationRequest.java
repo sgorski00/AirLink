@@ -6,8 +6,6 @@ import lombok.Data;
 
 @Data
 public class NewReservationRequest {
-    @NotNull(message = "User must be specified")
-    private Long userId;
     @NotNull(message = "Flight must be specified")
     private Long flightId;
     @Positive(message = "Number of seats must be a positive number")

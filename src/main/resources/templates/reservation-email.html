@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<h2>Reservation Confirmation - AirLink</h2>
+<p>Hello, <span th:text="${email}"></span>!</p>
+<p>Your reservation has been successfully made.</p>
+<ul>
+    <li><strong>Flight:</strong> <span th:text="${flight.from.city} + ' - ' + ${flight.to.city}"></span></li>
+    <li><strong>Date:</strong> <span th:text="${flight.departure}"></span></li>
+    <li><strong>Number of seats:</strong> <span th:text="${seats}"></span></li>
+    <li><strong>Total price:</strong> <span th:text="${price}"></span> PLN</li>
+    <li><strong>Status:</strong> <span th:text="${status}"></span></li>
+</ul>
+<p>Please confirm your reservation using the following link: {{confirmation link}}</p>
+<p>You can also cancel your reservation using this link: {{cancellation link}}</p>
+<p>Thank you for choosing AirLink!</p>
+</body>
+</html>

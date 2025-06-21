@@ -1,11 +1,13 @@
 package pl.sgorski.AirLink.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
 import pl.sgorski.AirLink.dto.UpdateReservationRequest;
 import pl.sgorski.AirLink.model.Reservation;
 import pl.sgorski.AirLink.model.ReservationStatus;
@@ -18,18 +20,36 @@ import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final UserService userService;
+    private final MailService mailService;
+    private final TemplateEngine templateEngine;
 
     public Reservation save(Reservation reservation) {
         if(!reservation.getFlight().isAvailableToBook(reservation.getNumberOfSeats())){
             throw new IllegalArgumentException("This flight is no longer available to book.");
         }
         return reservationRepository.save(reservation);
+    }
+
+    public Reservation create(Reservation reservation, String userEmail) {
+        log.debug("Creating reservation for user: {}", userEmail);
+        log.debug("Reservation details: {}", reservation);
+        User user = userService.findByEmail(userEmail);
+        reservation.setUser(user);
+        Reservation savedReservation = save(reservation);
+        mailService.sendEmail(
+                savedReservation.getUser().getEmail(),
+                "AirLink - Reservation no. " + savedReservation.getId(),
+                templateEngine.process("reservation-email", savedReservation.toEmailContext())
+        );
+        log.info("Reservation email sent");
+        return savedReservation;
     }
 
     public Reservation findById(Long id) {

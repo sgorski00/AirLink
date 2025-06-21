@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.thymeleaf.context.Context;
 import pl.sgorski.AirLink.model.auth.User;
 
 import java.sql.Timestamp;
@@ -41,5 +42,19 @@ public class Reservation implements Ownable {
     @Override
     public Long getOwnerId() {
         return user.getId();
+    }
+
+    public double getPrice() {
+        return flight.getPrice() * numberOfSeats;
+    }
+
+    public Context toEmailContext() {
+        Context context = new Context();
+        context.setVariable("email", user.getEmail());
+        context.setVariable("flight", flight);
+        context.setVariable("seats", numberOfSeats);
+        context.setVariable("price", getPrice());
+        context.setVariable("status", status);
+        return context;
     }
 }
