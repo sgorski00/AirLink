@@ -15,8 +15,6 @@ import pl.sgorski.AirLink.model.auth.User;
 import pl.sgorski.AirLink.repository.ReservationRepository;
 import pl.sgorski.AirLink.service.auth.UserService;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -73,7 +71,7 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(id).orElseThrow(
                         () -> new NoSuchElementException("Reservation not found or already deleted")
         );
-        reservation.setDeletedAt(Timestamp.from(Instant.now()));
+        reservation.setStatus(ReservationStatus.DELETED);
         return reservationRepository.save(reservation);
     }
 
@@ -82,7 +80,7 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findDeletedById(id).orElseThrow(
                 () -> new NoSuchElementException("Reservation not found or not deleted")
         );
-        reservation.setDeletedAt(null);
+        reservation.restore();
         return reservationRepository.save(reservation);
     }
 

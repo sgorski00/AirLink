@@ -22,8 +22,6 @@ import pl.sgorski.AirLink.model.auth.User;
 import pl.sgorski.AirLink.repository.ReservationRepository;
 import pl.sgorski.AirLink.service.auth.UserService;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -115,7 +113,7 @@ public class ReservationServiceTests {
 
     @Test
     void shouldRestoreReservationById() {
-        reservation.setDeletedAt(Timestamp.from(Instant.now()));
+        reservation.setStatus(ReservationStatus.DELETED);
         when(reservationRepository.findDeletedById(anyLong())).thenReturn(Optional.of(reservation));
 
         reservationService.restoreById(1L);

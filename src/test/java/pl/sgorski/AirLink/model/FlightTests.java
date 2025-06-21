@@ -82,6 +82,7 @@ public class FlightTests {
     void shouldNotTakeAvailableSeatsIfReservationHasStatusCompleted() {
         Reservation res = new Reservation();
         res.setNumberOfSeats(5);
+        res.setStatus(ReservationStatus.CONFIRMED);
         res.setStatus(ReservationStatus.COMPLETED);
 
         flight.getReservations().add(res);

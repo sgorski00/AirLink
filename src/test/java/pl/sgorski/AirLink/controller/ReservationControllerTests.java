@@ -14,9 +14,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import pl.sgorski.AirLink.dto.NewReservationRequest;
 import pl.sgorski.AirLink.dto.ReservationResponse;
 import pl.sgorski.AirLink.dto.UpdateReservationRequest;
+import pl.sgorski.AirLink.mapper.ReservationHistoryMapper;
 import pl.sgorski.AirLink.mapper.ReservationMapper;
 import pl.sgorski.AirLink.model.Reservation;
 import pl.sgorski.AirLink.model.ReservationStatus;
+import pl.sgorski.AirLink.service.ReservationHistoryService;
 import pl.sgorski.AirLink.service.ReservationService;
 import pl.sgorski.AirLink.service.auth.JwtService;
 
@@ -45,6 +47,12 @@ public class ReservationControllerTests {
 
     @MockitoBean
     private ReservationService reservationService;
+
+    @MockitoBean
+    private ReservationHistoryMapper historyMapper;
+
+    @MockitoBean
+    private ReservationHistoryService reservationHistoryService;
 
     @MockitoBean
     private JwtService jwtService;

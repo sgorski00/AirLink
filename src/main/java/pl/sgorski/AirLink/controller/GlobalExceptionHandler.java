@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import pl.sgorski.AirLink.exception.IllegalStatusException;
 
 import java.util.NoSuchElementException;
 
@@ -40,6 +41,14 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleValidationException(MethodArgumentNotValidException e) {
         String errorMessage = e.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errorMessage);
+    }
+
+    @ExceptionHandler(IllegalStatusException.class)
+    public ProblemDetail handleIllegalStatusException(IllegalStatusException e) {
+        return ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT,
+                e.getMessage()
+        );
     }
 
     @ExceptionHandler(DataAccessException.class)
