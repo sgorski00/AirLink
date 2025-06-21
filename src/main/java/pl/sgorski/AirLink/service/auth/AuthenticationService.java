@@ -7,6 +7,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 import pl.sgorski.AirLink.dto.auth.LoginRequest;
 import pl.sgorski.AirLink.dto.auth.LoginResponse;
 import pl.sgorski.AirLink.dto.auth.RegisterRequest;
@@ -15,6 +17,7 @@ import pl.sgorski.AirLink.mapper.RegistrationMapper;
 import pl.sgorski.AirLink.model.Profile;
 import pl.sgorski.AirLink.model.auth.Role;
 import pl.sgorski.AirLink.model.auth.User;
+import pl.sgorski.AirLink.service.MailService;
 import pl.sgorski.AirLink.service.ProfileService;
 
 @Log4j2
@@ -29,6 +32,8 @@ public class AuthenticationService {
     private final RoleService roleService;
     private final ProfileService profileService;
     private final RegistrationMapper registrationMapper;
+    private final MailService mailService;
+    private final TemplateEngine templateEngine;
 
     public LoginResponse authenticate(LoginRequest request) {
         authenticationManager.authenticate(
@@ -49,6 +54,11 @@ public class AuthenticationService {
         log.debug("Registering user with empty profile: {}", user);
         User savedUser = userService.save(user);
         log.info("User registered successfully: {}", savedUser.getEmail());
+        mailService.sendEmail(
+                savedUser.getEmail(),
+                "Welcome to AirLink",
+                templateEngine.process("welcome-email", new Context())
+        );
         return registrationMapper.toResponse(savedUser);
     }
 }

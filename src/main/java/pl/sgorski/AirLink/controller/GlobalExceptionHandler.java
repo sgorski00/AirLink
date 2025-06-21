@@ -50,6 +50,7 @@ public class GlobalExceptionHandler {
                     "Data integrity violation: " + ie.getMostSpecificCause().getMessage()
             );
         }
+        e.printStackTrace();
         return ProblemDetail.forStatusAndDetail(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Database error: " + e.getMessage()
@@ -72,9 +73,9 @@ public class GlobalExceptionHandler {
         );
     }
 
-
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleException(Exception e) {
+        e.printStackTrace();
         return ProblemDetail.forStatusAndDetail(
                 HttpStatusCode.valueOf(500),
                 e.getMessage()

@@ -2,6 +2,8 @@ package pl.sgorski.AirLink.model.localization;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.List;
@@ -9,6 +11,8 @@ import java.util.List;
 @Entity
 @Table(name = "countries")
 @Data
+@ToString(exclude = "cities")
+@EqualsAndHashCode(exclude = "cities")
 public class Country implements Serializable {
 
     @Id

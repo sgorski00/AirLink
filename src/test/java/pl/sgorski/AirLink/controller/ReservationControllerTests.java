@@ -145,13 +145,13 @@ public class ReservationControllerTests {
     @Test
     void shouldCreateNewReservation() throws Exception {
         NewReservationRequest request = new NewReservationRequest();
-        request.setUserId(1L);
         request.setFlightId(1L);
         request.setNumberOfSeats(2);
 
         when(reservationMapper.toResponse(nullable(Reservation.class))).thenReturn(new ReservationResponse());
 
         mockMvc.perform(post("/api/reservations")
+                        .principal(() -> "testUser")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -159,21 +159,21 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(201))
                 .andExpect(jsonPath("$.data").isNotEmpty());
 
-        verify(reservationService, times(1)).save(nullable(Reservation.class));
+        verify(reservationService, times(1)).create(nullable(Reservation.class), anyString());
     }
 
     @Test
     void shouldNotCreateNewReservationIfFlightNotAvailable() throws Exception {
         NewReservationRequest request = new NewReservationRequest();
-        request.setUserId(1L);
         request.setFlightId(1L);
         request.setNumberOfSeats(2);
 
-        when(reservationService.save(nullable(Reservation.class))).thenThrow(
+        when(reservationService.create(nullable(Reservation.class), anyString())).thenThrow(
                 new IllegalArgumentException("This flight is no longer available to book.")
         );
 
         mockMvc.perform(post("/api/reservations")
+                        .principal(() -> "testUser")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -181,17 +181,17 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.data").doesNotExist());
 
-        verify(reservationService, times(1)).save(nullable(Reservation.class));
+        verify(reservationService, times(1)).create(nullable(Reservation.class), anyString());
     }
 
     @Test
     void shouldNotCreateNewReservationIfSeatsAreNotPositive() throws Exception {
         NewReservationRequest request = new NewReservationRequest();
-        request.setUserId(1L);
         request.setFlightId(1L);
         request.setNumberOfSeats(-2);
 
         mockMvc.perform(post("/api/reservations")
+                        .principal(() -> "testUser")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -199,7 +199,7 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.data").doesNotExist());
 
-        verify(reservationService, never()).save(nullable(Reservation.class));
+        verify(reservationService, never()).create(nullable(Reservation.class), anyString());
     }
 
     @Test
@@ -216,16 +216,16 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.data").doesNotExist());
 
-        verify(reservationService, never()).save(nullable(Reservation.class));
+        verify(reservationService, never()).create(nullable(Reservation.class), nullable(String.class));
     }
 
     @Test
     void shouldNotCreateNewReservationIfFlightIsNull() throws Exception {
         NewReservationRequest request = new NewReservationRequest();
-        request.setUserId(1L);
         request.setNumberOfSeats(-2);
 
         mockMvc.perform(post("/api/reservations")
+                        .principal(() -> "testUser")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -233,16 +233,16 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.data").doesNotExist());
 
-        verify(reservationService, never()).save(nullable(Reservation.class));
+        verify(reservationService, never()).create(nullable(Reservation.class), anyString());
     }
 
     @Test
     void shouldNotCreateNewReservationIfNumberOfSeatsIsNull() throws Exception {
         NewReservationRequest request = new NewReservationRequest();
         request.setFlightId(1L);
-        request.setUserId(1L);
 
         mockMvc.perform(post("/api/reservations")
+                        .principal(() -> "testUser")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -250,7 +250,7 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.data").doesNotExist());
 
-        verify(reservationService, never()).save(nullable(Reservation.class));
+        verify(reservationService, never()).create(nullable(Reservation.class), anyString());
     }
 
     @Test

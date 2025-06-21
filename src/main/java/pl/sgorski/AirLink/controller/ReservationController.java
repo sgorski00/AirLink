@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -26,6 +27,7 @@ import pl.sgorski.AirLink.service.ReservationService;
 
 import java.security.Principal;
 
+@Log4j2
 @RestController
 @RequestMapping("/api/reservations")
 @RequiredArgsConstructor
@@ -85,12 +87,13 @@ public class ReservationController {
             @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<?> createReservation(
-            @Valid @RequestBody NewReservationRequest request
+            @Valid @RequestBody NewReservationRequest request,
+            Principal principal
     ) {
         return ResponseEntity.status(201).body(new ResponseDto<>(
             "Reservation created",
             201,
-            mapper.toResponse(reservationService.save(mapper.toReservation(request)))
+            mapper.toResponse(reservationService.create(mapper.toReservation(request), principal.getName()))
         ));
     }
 
