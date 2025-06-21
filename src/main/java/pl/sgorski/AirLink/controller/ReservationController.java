@@ -21,8 +21,10 @@ import pl.sgorski.AirLink.dto.generic.PaginationResponseDto;
 import pl.sgorski.AirLink.dto.generic.ResponseDto;
 import pl.sgorski.AirLink.dto.NewReservationRequest;
 import pl.sgorski.AirLink.dto.UpdateReservationRequest;
+import pl.sgorski.AirLink.mapper.ReservationHistoryMapper;
 import pl.sgorski.AirLink.mapper.ReservationMapper;
 import pl.sgorski.AirLink.model.Reservation;
+import pl.sgorski.AirLink.service.ReservationHistoryService;
 import pl.sgorski.AirLink.service.ReservationService;
 
 import java.security.Principal;
@@ -35,7 +37,9 @@ import java.security.Principal;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationHistoryService reservationHistoryService;
     private final ReservationMapper mapper;
+    private final ReservationHistoryMapper historyMapper;
 
     @GetMapping
     @Operation(summary = "Get all reservations", description = "Retrieve a paginated list of reservations. Content depeneds on user role. " +
@@ -151,6 +155,26 @@ public class ReservationController {
                 "Reservation restored",
                 200,
                 mapper.toResponse(reservationService.restoreById(id))
+        ));
+    }
+
+    @GetMapping("{id}/history")
+    @Operation(summary = "Get reservation history", description = "Retrieve the history of a reservation by its ID. Access is restricted to the user who created the reservation or an admin.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reservation history found", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "Reservation not found", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<?> getReservationHistory(
+            @PathVariable Long id,
+            Principal principal
+    ) {
+        if(!reservationService.haveAccessByEmail(id, principal.getName())) throw new AccessDeniedException("You do not have access to this reservation");
+        return ResponseEntity.ok(new ResponseDto<>(
+                "Reservation history found",
+                200,
+                reservationHistoryService.getHistoryByReservationId(id).stream()
+                        .map(historyMapper::toResponse)
         ));
     }
 }

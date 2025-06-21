@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -31,16 +32,18 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/docs/**", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/flights/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/flights/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/flights/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/flights/**").hasRole("ADMIN")
-                        .requestMatchers("/api/reservations/restore/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/flights/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/flights/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/flights/**").hasAuthority("ADMIN")
+                        .requestMatchers("/api/reservations/restore/**").hasAuthority("ADMIN")
                         .requestMatchers("/api/reservations/**").authenticated()
                         .requestMatchers("/api/profile/**").authenticated()
                         .anyRequest().denyAll())
                 .userDetailsService(userDetailsService)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler(accessDeniedHandler()))
                 .build();
     }
 
@@ -52,5 +55,10 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return new AccessDeniedHandlerImpl();
     }
 }

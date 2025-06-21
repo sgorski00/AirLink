@@ -5,9 +5,15 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.thymeleaf.context.Context;
+import pl.sgorski.AirLink.exception.IllegalStatusException;
 import pl.sgorski.AirLink.model.auth.User;
 
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
+import static pl.sgorski.AirLink.model.ReservationStatus.*;
 
 @Entity
 @Table(name = "reservations")
@@ -39,6 +45,15 @@ public class Reservation implements Ownable {
 
     private Timestamp deletedAt;
 
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+
+    private List<ReservationHistory> history = new ArrayList<>();
+
+    @PrePersist
+    public void addHistory() {
+        this.history.add(toHistory());
+    }
+
     @Override
     public Long getOwnerId() {
         return user.getId();
@@ -56,5 +71,34 @@ public class Reservation implements Ownable {
         context.setVariable("price", getPrice());
         context.setVariable("status", status);
         return context;
+    }
+
+    public ReservationHistory toHistory() {
+        return ReservationHistory.builder()
+                .reservation(this)
+                .status(status)
+                .build();
+    }
+
+    public void restore() {
+        if(this.status != DELETED) return;
+        this.setDeletedAt(null);
+        this.status = PENDING;
+        this.history.add(toHistory());
+    }
+
+    public void setStatus(ReservationStatus status) {
+        if (status == null) throw new IllegalArgumentException("Reservation status cannot be null");
+        if (this.status == status) return;
+        if (status == PENDING) throw new IllegalStatusException("Cannot change reservation status to pending.");
+        if (status == DELETED) this.setDeletedAt(Timestamp.from(Instant.now()));
+        if (status == CONFIRMED && this.status != PENDING)
+            throw new IllegalStatusException("Cannot confirm a reservation that is not pending.");
+        if (status == CANCELLED && (this.status != PENDING && this.status != CONFIRMED))
+            throw new IllegalStatusException("Cannot confirm a reservation that is not pending.");
+        if (status == COMPLETED && this.status != CONFIRMED)
+            throw new IllegalStatusException("Cannot complete a reservation that is not confirmed.");
+        this.status = status;
+        this.history.add(toHistory());
     }
 }
