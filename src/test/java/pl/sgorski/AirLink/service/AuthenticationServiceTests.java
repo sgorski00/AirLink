@@ -8,6 +8,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 import pl.sgorski.AirLink.dto.auth.LoginRequest;
 import pl.sgorski.AirLink.dto.auth.LoginResponse;
 import pl.sgorski.AirLink.dto.auth.RegisterRequest;
@@ -49,6 +51,12 @@ public class AuthenticationServiceTests {
 
     @Mock
     private RegistrationMapper mapper;
+
+    @Mock
+    private TemplateEngine templateEngine;
+
+    @Mock
+    private MailService mailService;
 
     @InjectMocks
     private AuthenticationService authenticationService;
@@ -101,7 +109,9 @@ public class AuthenticationServiceTests {
     @Test
     void shouldRegisterUser() {
         Profile profile = new Profile();
+        user.setEmail("test@test.pl");
         user.setPassword("pass");
+        when(templateEngine.process(anyString(), any(Context.class))).thenReturn("Subject");
         when(profileService.save(any(Profile.class))).thenReturn(profile);
         when(roleService.findByName(anyString())).thenReturn(role);
         when(mapper.toUser(any(RegisterRequest.class), any(Role.class))).thenReturn(user);
@@ -113,5 +123,6 @@ public class AuthenticationServiceTests {
         assertNotNull(response);
         verify(userService, times(1)).save(any(User.class));
         verify(profileService, times(1)).save(any(Profile.class));
+        verify(mailService, times(1)).sendEmail(anyString(), anyString(), anyString());
     }
 }
