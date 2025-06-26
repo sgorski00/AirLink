@@ -162,6 +162,7 @@ public class DataSeeder implements ApplicationRunner {
             airplane.setName(faker.aviation().aircraft());
             airplane.setCode(faker.bothify("?###").toUpperCase());
             airplane.setSeats(faker.number().numberBetween(100, 500));
+            airplane.setSerialNumber(faker.bothify("SN-########").toUpperCase());
             airplane = airplaneService.save(airplane);
             airplanes.add(airplane);
         }

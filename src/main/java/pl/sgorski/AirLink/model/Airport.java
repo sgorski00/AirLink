@@ -2,6 +2,7 @@ package pl.sgorski.AirLink.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import pl.sgorski.AirLink.dto.AirportRequest;
 import pl.sgorski.AirLink.model.localization.City;
 
 import java.io.Serializable;
@@ -21,4 +22,9 @@ public class Airport implements Serializable {
 
     @Column(nullable = false, unique = true)
     private String icao;
+
+    public void update(Airport airport) {
+        this.city = airport.getCity();
+        this.icao = airport.getIcao();
+    }
 }

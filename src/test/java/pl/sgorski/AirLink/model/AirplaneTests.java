@@ -2,12 +2,12 @@ package pl.sgorski.AirLink.model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import pl.sgorski.AirLink.dto.AirplaneRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AirplaneTests {
 
@@ -104,5 +104,43 @@ public class AirplaneTests {
         boolean isAvailable = airplane.isAvailable(LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1));
 
         assertTrue(isAvailable);
+    }
+
+    @Test
+    void shouldUpdateFields() {
+        Airplane airplane = new Airplane();
+        airplane.setName("Old Name");
+        airplane.setCode("OLD123");
+        airplane.setSeats(100);
+
+        AirplaneRequest request = new AirplaneRequest();
+        request.setName("New Name");
+        request.setCode("NEW123");
+        request.setCapacity(150);
+
+        airplane.update(request);
+
+        assertEquals("New Name", airplane.getName());
+        assertEquals("NEW123", airplane.getCode());
+        assertEquals(150, airplane.getSeats());
+    }
+
+    @Test
+    void shouldDeleteAirplane() {
+        Airplane airplane = new Airplane();
+        airplane.delete();
+
+        assertNotNull(airplane.getDeletedAt());
+        assertThrows(IllegalStateException.class, airplane::delete);
+    }
+
+    @Test
+    void shouldRestoreAirplane() {
+        Airplane airplane = new Airplane();
+        airplane.delete();
+        airplane.restore();
+
+        assertNull(airplane.getDeletedAt());
+        assertThrows(IllegalStateException.class, airplane::restore);
     }
 }

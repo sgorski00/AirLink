@@ -36,6 +36,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/flights/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/flights/**").hasAuthority("ADMIN")
                         .requestMatchers("/api/reservations/restore/**").hasAuthority("ADMIN")
+                        .requestMatchers("/api/airports/**", "/api/airplanes/**").hasAuthority("ADMIN")
                         .requestMatchers("/api/reservations/**").authenticated()
                         .requestMatchers("/api/profile/**").authenticated()
                         .anyRequest().denyAll())
