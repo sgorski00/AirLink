@@ -6,6 +6,7 @@ import pl.sgorski.AirLink.model.localization.Country;
 import pl.sgorski.AirLink.repository.localization.CountryRepository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -27,5 +28,10 @@ public class CountryService {
 
     public boolean existsByNameOrCode(String name, String code) {
         return countryRepository.existsByNameIgnoreCaseOrCodeIgnoreCase(name, code);
+    }
+
+    public Country findById(Long countryId) {
+        return countryRepository.findById(countryId)
+                .orElseThrow(() -> new NoSuchElementException("Country with id " + countryId + " not found"));
     }
 }

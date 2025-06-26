@@ -6,6 +6,7 @@ import pl.sgorski.AirLink.model.localization.City;
 import pl.sgorski.AirLink.repository.localization.CityRepository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -27,5 +28,10 @@ public class CityService {
 
     public boolean existsByName(String name) {
         return cityRepository.existsByName(name);
+    }
+
+    public City findById(Long id) {
+        return cityRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("City with id " + id + " not found"));
     }
 }

@@ -10,6 +10,11 @@ AirLink is a flight reservation REST API.
 
 Make sure you have Docker and Docker Compose installed.
 
+## API Documentation
+
+Swagger UI is available at:  
+[http://localhost:8080/docs](http://localhost:8080/docs)
+
 ### Available commands (Makefile):
 
 | Command                           | Description                                  |
