@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import pl.sgorski.AirLink.dto.AirplaneRequest;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -22,11 +23,14 @@ public class Airplane implements Serializable {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String code;
 
     @Column(nullable = false)
     private int seats;
+
+    @Column(nullable = false, unique = true)
+    private String serialNumber;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -41,11 +45,28 @@ public class Airplane implements Serializable {
     private List<Flight> flights;
 
     public boolean isAvailable(LocalDateTime departure, LocalDateTime arrival) {
-        if(flights == null || flights.isEmpty()) return true;
+        if (flights == null || flights.isEmpty()) return true;
         return flights.stream()
                 .filter(flight -> flight.getDeletedAt() == null)
                 .noneMatch(flight ->
-                    (departure.isBefore(flight.getArrival()) && arrival.isAfter(flight.getDeparture()))
+                        (departure.isBefore(flight.getArrival()) && arrival.isAfter(flight.getDeparture()))
                 );
+    }
+
+    public void update(AirplaneRequest airplane) {
+        this.name = airplane.getName();
+        this.code = airplane.getCode();
+        this.serialNumber = airplane.getSerialNumber();
+        this.seats = airplane.getCapacity();
+    }
+
+    public void delete() {
+        if (this.deletedAt != null) throw new IllegalStateException("Airplane is already deleted");
+        this.deletedAt = Timestamp.valueOf(LocalDateTime.now());
+    }
+
+    public void restore() {
+        if (this.deletedAt == null) throw new IllegalStateException("Airplane is not deleted");
+        this.deletedAt = null;
     }
 }

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -73,7 +74,7 @@ public class AirportController {
             @ApiResponse(responseCode = "409", description = "Invalid request data")
     })
     public ResponseEntity<?> createAirport(
-            @RequestBody AirportRequest airportRequest
+            @RequestBody @Valid AirportRequest airportRequest
     ) {
         Airport airport = airportMapper.toAirport(airportRequest);
         Airport savedAirport = airportService.save(airport);
@@ -93,7 +94,7 @@ public class AirportController {
     })
     public ResponseEntity<?> updateAirport(
             @PathVariable Long id,
-            @RequestBody AirportRequest airportRequest
+            @RequestBody @Valid AirportRequest airportRequest
     ) {
         Airport existingAirport = airportService.findById(id);
         existingAirport.update(airportMapper.toAirport(airportRequest));
