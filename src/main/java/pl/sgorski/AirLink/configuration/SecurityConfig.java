@@ -30,12 +30,13 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/docs/**", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/", "/docs/**", "/swagger", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/flights/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/flights/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/flights/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/flights/**").hasAuthority("ADMIN")
                         .requestMatchers("/api/reservations/restore/**").hasAuthority("ADMIN")
+                        .requestMatchers("/actuator/**").hasAuthority("ADMIN")
                         .requestMatchers("/api/airports/**", "/api/airplanes/**").hasAuthority("ADMIN")
                         .requestMatchers("/api/reservations/**").authenticated()
                         .requestMatchers("/api/profile/**").authenticated()
