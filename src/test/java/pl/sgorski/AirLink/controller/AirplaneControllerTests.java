@@ -237,7 +237,8 @@ public class AirplaneControllerTests {
     @Test
     void shouldReturnBadRequestIfRestoreAirplaneNotDeleted() throws Exception {
         when(airplaneService.findByIdWithDeleted(anyLong())).thenReturn(new Airplane());
-        doThrow(IllegalStateException.class).when(airplaneService).restore(any(Airplane.class));
+        IllegalStateException exception = new IllegalStateException("Airplane is not deleted");
+        doThrow(exception).when(airplaneService).restore(any(Airplane.class));
 
         mockMvc.perform(put("/api/airplanes/{id}/restore", 1L))
                 .andExpect(status().isBadRequest())
@@ -245,7 +246,8 @@ public class AirplaneControllerTests {
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.data").doesNotExist());
 
-        verify(airplaneService, times(1)).findById(1L);
-        verify(airplaneService, never()).restore(any(Airplane.class));
+        verify(airplaneService, times(1)).findByIdWithDeleted(1L);
+        verify(airplaneService, times(1
+        )).restore(any(Airplane.class));
     }
 }

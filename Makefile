@@ -16,10 +16,10 @@ restart:
 	docker compose restart
 
 test:
-	docker exec -it app mvn test
+	docker exec -it app mvn test -Pdocker
 
 test-class:
-	docker exec -it app mvn test -Dtest=${class}
+	docker exec -it app mvn test -Pdocker -Dtest=${class}
 
 psql:
 	docker exec -it db psql -U root -d AirLink
