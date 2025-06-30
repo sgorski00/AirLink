@@ -1,23 +1,44 @@
 ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white)
 [![codecov](https://codecov.io/gh/sgorski00/AirLink/graph/badge.svg?token=8CS976QYZG)](https://codecov.io/gh/sgorski00/AirLink)
+
 # AirLink
 
 ## Description
 
-AirLink is a flight reservation REST API.
+AirLink is a flight reservation REST API written in Java 21 and Spring Boot 3.5.0.
+
+## Live demo
+
+App is available here:  
+[https://airlink-zsy6.onrender.com/](https://airlink-zsy6.onrender.com/)
+
+## API Documentation
+
+Swagger UI is available at:
+[https://airlink-zsy6.onrender.com/docs](https://airlink-zsy6.onrender.com/docs)
+
+Or locally:
+[http://localhost:8080/docs](http://localhost:8080/docs) 
+
+## Technoliges used
+- Java 21 + Spring Boot 3.5.0
+- PostgreSQL
+- Redis
+- Flyway
+- Docker
+- Maven
+- JUnit 5 + Mockito
 
 ---
 
 ## Getting Started
 
-Make sure you have Docker and Docker Compose installed.
+Make sure you have Docker and Docker Compose installed. 
+Before installation, ensure that the `.env` file is filled out correctly.
 
-## API Documentation
+To run application locally simply run `make up`.
 
-Swagger UI is available at:  
-[http://localhost:8080/docs](http://localhost:8080/docs)
-
-### Available commands (Makefile):
+### Important commands (Makefile):
 
 | Command                           | Description                                  |
 |-----------------------------------|----------------------------------------------|
@@ -31,19 +52,32 @@ Swagger UI is available at:
 | `make psql`                       | Connect to PostgreSQL database shell         |
 | `make shell`                      | Open shell inside app container              |
 | `make redis`                      | Open Redis CLI                               |
-| `make flyway-clean`               | Clean database using Flyway                  |
 | `make flyway-migrate`             | Run database migrations Flyway               |
-| `make flyway-info`                | Show Flyway migration info                   |
+
+## Environment Variables
+
+Application requires the following environment variables to run properly (e.g. in `.env.example` file):
+
+```env
+# Datasource
+SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/AirLink
+SPRING_DATASOURCE_USERNAME=root
+SPRING_DATASOURCE_PASSWORD=secret
+
+# Mail
+SPRING_MAIL_HOST=mailhog
+SPRING_MAIL_PORT=1025
+SPRING_MAIL_USERNAME=support@airlink.com
+SPRING_MAIL_PASSWORD=secret
+SPRING_MAIL_STARTTLS_ENABLE=false
+SPRING_MAIL_AUTH_ENABLE=false
+
+# Redis
+SPRING_REDIS_HOST=redis
+SPRING_REDIS_PORT=6379
+```
 
 ---
 
-## Notes
-
-- The API is currently under development.
-- Use `make up` to start the environment before development.
-
----
-
-## Requirements
-
-- Docker
+## Author
+[sgorski00](https://github.com/sgorski00)
