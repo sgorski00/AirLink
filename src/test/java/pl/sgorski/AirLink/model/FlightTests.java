@@ -111,4 +111,17 @@ public class FlightTests {
         flight.setReservations(new ArrayList<>());
         assertFalse(flight.isAvailableToBook(1));
     }
+
+    @Test
+    void shouldDeleteFlight() {
+        flight.delete();
+        assertNotNull(flight.getDeletedAt());
+    }
+
+    @Test
+    void shouldRestoreFlight() {
+        flight.setDeletedAt(Timestamp.from(Instant.now()));
+        flight.restore();
+        assertNull(flight.getDeletedAt());
+    }
 }

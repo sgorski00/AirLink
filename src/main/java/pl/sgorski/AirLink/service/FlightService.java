@@ -13,8 +13,6 @@ import pl.sgorski.AirLink.model.Airplane;
 import pl.sgorski.AirLink.model.Flight;
 import pl.sgorski.AirLink.repository.FlightRepository;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -70,7 +68,7 @@ public class FlightService {
         if (!flight.isActive()) {
             throw new IllegalArgumentException("Cannot delete a flight that has already departed.");
         }
-        flight.setDeletedAt(Timestamp.from(Instant.now()));
+        flight.delete();
         return flightRepository.save(flight);
     }
 
@@ -79,7 +77,7 @@ public class FlightService {
         Flight flight = flightRepository.findDeletedById(id).orElseThrow(
                 () -> new NoSuchElementException("Flight not found or not deleted")
         );
-        flight.setDeletedAt(null);
+        flight.restore();
         return flightRepository.save(flight);
     }
 

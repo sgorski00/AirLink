@@ -7,9 +7,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import pl.sgorski.AirLink.model.Airplane;
@@ -82,6 +83,30 @@ public class FlightServiceTests {
     }
 
     @Test
+    void shouldFindAll() {
+        List<Flight> flights = List.of(flight);
+        when(flightRepository.findAll()).thenReturn(flights);
+
+        List<Flight> result = flightService.findAll();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(flight, result.getFirst());
+        verify(flightRepository, times(1)).findAll();
+    }
+
+    @Test
+    void shouldFindAllPaginated() {
+        Page<Flight> page = new PageImpl<>(List.of(flight));
+        when(flightRepository.findAllActiveFiltered(any(Pageable.class), anyLong(), anyLong())).thenReturn(page);
+
+        Page<Flight> result = flightService.findAllActivePaginated(Pageable.unpaged(), 1L, 2L);
+
+        assertNotNull(result);
+        verify(flightRepository, times(1)).findAllActiveFiltered(any(Pageable.class), anyLong(), anyLong());
+    }
+
+    @Test
     void shouldFindById() {
         Authentication authentication = Mockito.mock(Authentication.class);
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
@@ -118,6 +143,16 @@ public class FlightServiceTests {
     }
 
     @Test
+    void shouldCountFlights() {
+        when(flightRepository.count()).thenReturn(10L);
+
+        long count = flightService.count();
+
+        assertEquals(10L, count);
+        verify(flightRepository, times(1)).count();
+    }
+
+    @Test
     void shouldMakeSoftDelete() {
         when(flightRepository.findById(anyLong())).thenReturn(Optional.of(flight));
         flightService.deleteFlightById(1L);
@@ -125,6 +160,17 @@ public class FlightServiceTests {
         assertNotNull(flight.getDeletedAt());
         verify(flightRepository, times(1)).findById(anyLong());
         verify(flightRepository, times(1)).save(flight);
+    }
+
+    @Test
+    void shouldNotMakeSoftDeleteIfFlightNotFound() {
+        when(flightRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> flightService.deleteFlightById(1L));
+        assertNull(flight.getDeletedAt());
+
+        verify(flightRepository, times(1)).findById(anyLong());
+        verify(flightRepository, never()).save(flight);
     }
 
     @Test
@@ -148,5 +194,35 @@ public class FlightServiceTests {
         verify(flightRepository, times(1)).findDeletedById(anyLong());
         verify(flightRepository, times(1)).save(flight);
         assertNull(flight.getDeletedAt());
+    }
+
+    @Test
+    void shouldNotRestoreIfFlightNotFound() {
+        when(flightRepository.findDeletedById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> flightService.restoreById(1L));
+
+        verify(flightRepository, times(1)).findDeletedById(anyLong());
+        verify(flightRepository, never()).save(flight);
+    }
+
+    @Test
+    void shouldFindFlightWithReservations() {
+        when(flightRepository.findByIdWithReservations(anyLong())).thenReturn(Optional.of(flight));
+
+        Flight foundFlight = flightService.findByIdWithReservations(1L);
+
+        assertNotNull(foundFlight);
+        assertEquals(flight, foundFlight);
+        verify(flightRepository, times(1)).findByIdWithReservations(anyLong());
+    }
+
+    @Test
+    void shouldThrowIfFlightWithReservationsNotFound() {
+        when(flightRepository.findByIdWithReservations(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> flightService.findByIdWithReservations(1L));
+
+        verify(flightRepository, times(1)).findByIdWithReservations(anyLong());
     }
 }

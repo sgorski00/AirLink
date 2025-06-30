@@ -70,4 +70,12 @@ public class Flight implements Serializable {
     public boolean isActive() {
         return deletedAt == null && departure.isAfter(LocalDateTime.now());
     }
+
+    public void delete() {
+        this.deletedAt = Timestamp.valueOf(LocalDateTime.now());
+    }
+
+    public void restore() {
+        this.deletedAt = null;
+    }
 }
