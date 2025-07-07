@@ -44,6 +44,16 @@ public class Airplane implements Serializable {
     @OneToMany(mappedBy = "airplane", fetch = FetchType.LAZY)
     private List<Flight> flights;
 
+    public boolean isAvailable(Flight flight) {
+        if (flights == null || flights.isEmpty()) return true;
+        return flights.stream()
+                .filter(f -> f.getDeletedAt() == null)
+                .filter(f -> !f.getId().equals(flight.getId()))
+                .noneMatch(f ->
+                        (flight.getDeparture().isBefore(f.getArrival()) && flight.getArrival().isAfter(f.getDeparture()))
+                );
+    }
+
     public boolean isAvailable(LocalDateTime departure, LocalDateTime arrival) {
         if (flights == null || flights.isEmpty()) return true;
         return flights.stream()

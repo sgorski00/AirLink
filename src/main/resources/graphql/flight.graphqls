@@ -1,0 +1,46 @@
+type Query {
+    flights(
+        pageInput: PageInput!
+        sortInput: SortInput = {sortBy: "departure", sortDir: "asc"}
+        airportFrom: ID
+        airportTo: ID
+    ): [Flight!]!
+    flight(id: ID!): Flight
+}
+
+type Mutation {
+    deleteFlight(id: ID!): Flight
+    restoreFlight(id: ID!): Flight
+    createFlight(flightRequest: FlightRequest!): Flight
+    updateFlight(id: ID!, flightRequest: FlightRequest!): Flight
+}
+
+type Flight {
+    id: ID!
+    from: String!
+    to: String!
+    departure: String!
+    arrival: String!
+    price: Float!
+    airplaneName: String!
+    createdAt: String!
+}
+
+input FlightRequest {
+    airplaneId: Int!
+    departure: String!
+    arrival: String!
+    fromAirportId: Int!
+    toAirportId: Int!
+    price: Float!
+}
+
+input PageInput {
+    page: Int = 1
+    size: Int = 10
+}
+
+input SortInput {
+    sortBy: String!
+    sortDir: String!
+}

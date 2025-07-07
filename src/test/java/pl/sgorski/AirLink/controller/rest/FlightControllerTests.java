@@ -1,8 +1,6 @@
-package pl.sgorski.AirLink.controller;
+package pl.sgorski.AirLink.controller.rest;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -144,7 +142,7 @@ public class FlightControllerTests {
     @Test
     void shouldSoftDeleteFlight() throws Exception {
         Flight flight = new Flight();
-        when(flightService.deleteFlightById(anyLong())).thenReturn(flight);
+        when(flightService.deleteById(anyLong())).thenReturn(flight);
         when(flightMapper.toResponse(any(Flight.class))).thenReturn(new FlightResponse());
 
         mockMvc.perform(delete("/api/flights/1"))
@@ -153,7 +151,7 @@ public class FlightControllerTests {
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.data").isNotEmpty());
 
-        verify(flightService, times(1)).deleteFlightById(1L);
+        verify(flightService, times(1)).deleteById(1L);
     }
 
     @Test
