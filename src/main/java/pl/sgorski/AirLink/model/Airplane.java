@@ -47,7 +47,7 @@ public class Airplane implements Serializable {
     public boolean isAvailable(Flight flight) {
         if (flights == null || flights.isEmpty()) return true;
         return flights.stream()
-                .filter(f -> f.getDeletedAt() == null)
+                .filter(Flight::isActive)
                 .filter(f -> !f.getId().equals(flight.getId()))
                 .noneMatch(f ->
                         (flight.getDeparture().isBefore(f.getArrival()) && flight.getArrival().isAfter(f.getDeparture()))
@@ -57,7 +57,7 @@ public class Airplane implements Serializable {
     public boolean isAvailable(LocalDateTime departure, LocalDateTime arrival) {
         if (flights == null || flights.isEmpty()) return true;
         return flights.stream()
-                .filter(flight -> flight.getDeletedAt() == null)
+                .filter(Flight::isActive)
                 .noneMatch(flight ->
                         (departure.isBefore(flight.getArrival()) && arrival.isAfter(flight.getDeparture()))
                 );

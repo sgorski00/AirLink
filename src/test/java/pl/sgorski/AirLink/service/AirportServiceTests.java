@@ -84,4 +84,13 @@ public class AirportServiceTests {
         assertNotNull(result);
         verify(airportRepository, times(1)).findById(anyLong());
     }
+
+    @Test
+    void shouldThrowWhenAirportByIdNotFound() {
+        when(airportRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> airportService.findById(1L));
+
+        verify(airportRepository, times(1)).findById(anyLong());
+    }
 }

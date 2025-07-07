@@ -1,5 +1,6 @@
 package pl.sgorski.AirLink.controller.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -9,12 +10,14 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import pl.sgorski.AirLink.dto.FlightRequest;
 import pl.sgorski.AirLink.dto.FlightResponse;
 import pl.sgorski.AirLink.mapper.FlightMapper;
 import pl.sgorski.AirLink.model.Flight;
 import pl.sgorski.AirLink.service.FlightService;
 import pl.sgorski.AirLink.service.auth.JwtService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -29,6 +32,9 @@ public class FlightControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockitoBean
     private FlightService flightService;
@@ -169,5 +175,55 @@ public class FlightControllerTests {
         verify(flightService, times(1)).restoreById(1L);
     }
 
-    //TODO: Add tests for creating and updating flights
+    @Test
+    void shouldUpdateFlight() throws Exception {
+        FlightRequest flightRequest = new FlightRequest();
+        flightRequest.setAirplaneId(1L);
+        flightRequest.setDeparture(LocalDateTime.now().plusDays(1));
+        flightRequest.setArrival(LocalDateTime.now().plusDays(2));
+        flightRequest.setFromAirportId(1L);
+        flightRequest.setToAirportId(2L);
+        flightRequest.setPrice(100.0);
+
+        Flight flight = new Flight();
+        when(flightService.findById(anyLong())).thenReturn(flight);
+        when(flightService.save(any(Flight.class))).thenReturn(flight);
+        when(flightMapper.toResponse(any(Flight.class))).thenReturn(new FlightResponse());
+
+        mockMvc.perform(put("/api/flights/1")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(flightRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.detail").value("Flight updated"))
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data").isNotEmpty());
+
+        verify(flightService, times(1)).save(any(Flight.class));
+        verify(flightService, times(1)).findById(anyLong());
+    }
+
+    @Test
+    void shouldCreateFlight() throws Exception {
+        FlightRequest flightRequest = new FlightRequest();
+        flightRequest.setAirplaneId(1L);
+        flightRequest.setDeparture(LocalDateTime.now().plusDays(1));
+        flightRequest.setArrival(LocalDateTime.now().plusDays(2));
+        flightRequest.setFromAirportId(1L);
+        flightRequest.setToAirportId(2L);
+        flightRequest.setPrice(100.0);
+
+        when(flightMapper.toFlight(any(FlightRequest.class))).thenReturn(new Flight());
+        when(flightService.save(any(Flight.class))).thenReturn(new Flight());
+        when(flightMapper.toResponse(any(Flight.class))).thenReturn(new FlightResponse());
+
+        mockMvc.perform(post("/api/flights")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(flightRequest)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.detail").value("Flight created"))
+                .andExpect(jsonPath("$.status").value(201))
+                .andExpect(jsonPath("$.data").isNotEmpty());
+
+        verify(flightService, times(1)).save(any(Flight.class));
+    }
 }
