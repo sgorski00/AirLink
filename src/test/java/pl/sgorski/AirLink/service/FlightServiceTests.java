@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import pl.sgorski.AirLink.model.Airplane;
@@ -61,7 +62,7 @@ public class FlightServiceTests {
     }
 
     @Test
-    void shouldThrowIfAirplaneIsNotAvailable() {
+    void shouldThrowIfAirplaneIsNotAvailableWhileSave() {
         when(airplaneService.findByIdWithFlights(anyLong())).thenReturn(airplane);
         when(airplane.isAvailable(any(Flight.class))).thenReturn(false);
 
@@ -72,7 +73,7 @@ public class FlightServiceTests {
     }
 
     @Test
-    void shouldThrowIfAirplaneNotFound() {
+    void shouldThrowIfAirplaneNotFoundWhileSave() {
         when(airplaneService.findByIdWithFlights(anyLong())).thenThrow(NoSuchElementException.class);
 
         assertThrows(NoSuchElementException.class, () -> flightService.save(flight));
@@ -121,8 +122,50 @@ public class FlightServiceTests {
     }
 
     @Test
+    void shouldThrowIfNotAdminAndNotActiveFlightFindById() {
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SimpleGrantedAuthority userAuthority = new SimpleGrantedAuthority("ROLE_USER");
+        when(authentication.getAuthorities()).thenReturn((Collection) List.of(userAuthority));
+        SecurityContextHolder.setContext(securityContext);
+        flight.setDeparture(LocalDateTime.now().minusDays(1));
+        when(flightCacheService.findById(anyLong())).thenReturn(flight);
+
+        assertThrows(NoSuchElementException.class, () -> flightService.findById(1L));
+
+        verify(flightCacheService, times(1)).findById(anyLong());
+    }
+
+    @Test
+    void shouldReturnIfAdminAndNotActiveFlightFindById() {
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SimpleGrantedAuthority adminAuthority = new SimpleGrantedAuthority("ROLE_ADMIN");
+        when(authentication.getAuthorities()).thenReturn((Collection) List.of(adminAuthority));
+        SecurityContextHolder.setContext(securityContext);
+        when(flightCacheService.findById(anyLong())).thenReturn(flight);
+
+        Flight result = flightService.findById(1L);
+
+        assertNotNull(result);
+        assertEquals(flight, result);
+        verify(flightCacheService, times(1)).findById(anyLong());
+    }
+
+    @Test
     void shouldThrowIfFlightNotFound() {
         when(flightCacheService.findById(anyLong())).thenThrow(new NoSuchElementException("Flight not found"));
+
+        assertThrows(NoSuchElementException.class, () -> flightService.findById(1L));
+
+        verify(flightCacheService, times(1)).findById(anyLong());
+    }
+
+    @Test
+    void shouldThrowIfFlightIsNull() {
+        when(flightCacheService.findById(anyLong())).thenReturn(null);
 
         assertThrows(NoSuchElementException.class, () -> flightService.findById(1L));
 

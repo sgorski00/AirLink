@@ -35,16 +35,85 @@ public class AirplaneTests {
     }
 
     @Test
-    void shouldReturnFalseIfNotAvailable_StartBefore_EndInside() {
+    void shouldReturnTrueIfAvailableByFlight_NullFlights() {
         Airplane airplane = new Airplane();
-        airplane.setFlights(flights);
+        airplane.setFlights(null);
 
-        boolean isAvailable = airplane.isAvailable(
-                LocalDateTime.now().minusDays(2).withMinute(0).withSecond(0).withNano(0),
-                LocalDateTime.now().plusDays(2).withMinute(0).withSecond(0).withNano(0)
-        );
+        boolean isAvailable = airplane.isAvailable(new Flight());
+
+        assertTrue(isAvailable);
+    }
+
+    @Test
+    void shouldReturnTrueIfAvailableByFlight_EmptyFlights() {
+        Airplane airplane = new Airplane();
+        airplane.setFlights(List.of());
+
+        boolean isAvailable = airplane.isAvailable(new Flight());
+
+        assertTrue(isAvailable);
+    }
+
+    @Test
+    void shouldReturnTrueIfAvailableByFlight_ActiveFlight() {
+        Flight flight = new Flight();
+        flight.setId(1L);
+        flight.setDeparture(LocalDateTime.now().plusDays(1));
+        flight.setArrival(LocalDateTime.now().plusDays(2));
+        Airplane airplane = new Airplane();
+        airplane.setFlights(List.of(flight));
+
+        Flight flight2 = new Flight();
+        flight2.setId(2L);
+        flight2.setDeparture(LocalDateTime.now().plusDays(3));
+        flight2.setArrival(LocalDateTime.now().plusDays(4));
+        boolean isAvailable = airplane.isAvailable(flight2);
+
+        assertTrue(isAvailable);
+    }
+
+    @Test
+    void shouldReturnFalseIfAvailableByFlight() {
+        Flight flight = new Flight();
+        flight.setId(1L);
+        flight.setDeparture(LocalDateTime.now().plusDays(1));
+        flight.setArrival(LocalDateTime.now().plusDays(2));
+        Airplane airplane = new Airplane();
+        airplane.setFlights(List.of(flight));
+
+        Flight flight2 = new Flight();
+        flight2.setId(2L);
+        flight2.setDeparture(LocalDateTime.now());
+        flight2.setArrival(LocalDateTime.now().plusDays(3));
+        boolean isAvailable = airplane.isAvailable(flight2);
 
         assertFalse(isAvailable);
+    }
+
+    @Test
+    void shouldReturnTrueIfAvailableByFlight_NotActiveFlight() {
+        Flight flight = new Flight();
+        flight.setDeparture(LocalDateTime.now().minusDays(1));
+        flight.setArrival(LocalDateTime.now().plusDays(2));
+        Airplane airplane = new Airplane();
+        airplane.setFlights(List.of(flight));
+
+        boolean isAvailable = airplane.isAvailable(new Flight());
+
+        assertTrue(isAvailable);
+    }
+
+    @Test
+    void shouldReturnTrueIfAvailableByFlight_FlightAlreadyInList() {
+        Flight flight = new Flight();
+        flight.setDeparture(LocalDateTime.now().minusDays(1));
+        flight.setArrival(LocalDateTime.now().plusDays(2));
+        Airplane airplane = new Airplane();
+        airplane.setFlights(List.of(flight));
+
+        boolean isAvailable = airplane.isAvailable(flight);
+
+        assertTrue(isAvailable);
     }
 
     @Test

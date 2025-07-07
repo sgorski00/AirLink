@@ -6,7 +6,6 @@ import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.io.Serializable;
-import java.util.Set;
 
 @Table(name = "roles")
 @Entity
@@ -23,7 +22,7 @@ public class Role implements GrantedAuthority, Serializable {
 
     @Override
     public String getAuthority() {
-        return this.name;
+        return this.name.toUpperCase();
     }
 
     public boolean isAdmin() {

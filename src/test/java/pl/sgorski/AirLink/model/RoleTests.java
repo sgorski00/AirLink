@@ -26,4 +26,14 @@ public class RoleTests {
 
         assertFalse(result);
     }
+
+    @Test
+    void shouldReturnNameAsAuthority() {
+        Role adminRole = new Role();
+        adminRole.setName("user");
+
+        String result = adminRole.getAuthority();
+
+        assertEquals("USER", result);
+    }
 }

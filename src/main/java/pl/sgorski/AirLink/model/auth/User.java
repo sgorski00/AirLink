@@ -64,8 +64,8 @@ public class User implements UserDetails, Serializable {
     }
 
     public boolean haveAccess(Ownable ownableObject) {
-        if(this.role.isAdmin()) return true;
         if(ownableObject == null) return false;
+        if(this.role.isAdmin()) return true;
         if(ownableObject.getOwnerId() == null) return false;
         return ownableObject.getOwnerId().equals(this.id);
     }

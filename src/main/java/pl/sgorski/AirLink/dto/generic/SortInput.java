@@ -9,9 +9,13 @@ public class SortInput {
     private String sortDir;
 
     public Sort toSort() {
-        return Sort.by(
-                Sort.Direction.fromString(sortDir != null ? sortDir : "asc"),
-                sortBy != null ? sortBy : "id"
-        );
+        try {
+            return Sort.by(
+                    Sort.Direction.fromString(sortDir != null ? sortDir : "asc"),
+                    sortBy != null ? sortBy : "id"
+            );
+        } catch (Exception e) {
+            return Sort.by(Sort.Direction.DESC, "id");
+        }
     }
 }

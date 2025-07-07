@@ -10,6 +10,10 @@ public class PageInput {
     private int size = 10;
 
     public PageRequest toPageRequest(Sort sort) {
-        return PageRequest.of(page - 1, size, sort);
+        try {
+            return PageRequest.of(page - 1, size, sort);
+        }catch (Exception e) {
+            return PageRequest.of(0, 10);
+        }
     }
 }

@@ -144,4 +144,23 @@ public class AirplaneServiceTests {
         assertThrows(IllegalStateException.class, () -> airplaneService.restore(airplane));
         verify(airplaneRepository, never()).save(any(Airplane.class));
     }
+
+    @Test
+    void shouldReturnDeletedById() {
+        when(airplaneRepository.findByIdWithDeleted(1L)).thenReturn(Optional.of(airplane));
+
+        Airplane found = airplaneService.findByIdWithDeleted(1L);
+
+        assertNotNull(found);
+        verify(airplaneRepository, times(1)).findByIdWithDeleted(1L);
+    }
+
+    @Test
+    void shouldThrowWhenDeletedByIdNotFound() {
+        when(airplaneRepository.findByIdWithDeleted(1L)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> airplaneService.findByIdWithDeleted(1L));
+
+        verify(airplaneRepository, times(1)).findByIdWithDeleted(1L);
+    }
 }
