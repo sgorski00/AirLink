@@ -25,7 +25,6 @@ import java.security.Principal;
 @Tag(name = "Profile", description = "Endpoints for managing your profile")
 public class ProfileController {
 
-    private final UserService userService;
     private final ProfileMapper profileMapper;
     private final ProfileService profileService;
 
@@ -35,7 +34,7 @@ public class ProfileController {
     public ResponseEntity<?> getProfile(
             Principal principal
     ) {
-        Profile profile = userService.findByEmail(principal.getName()).getProfile();
+        Profile profile = profileService.getProfileByEmail(principal.getName());
         return ResponseEntity.ok(new ResponseDto<>(
                 "Profile retrieved successfully",
                 200,
@@ -50,7 +49,7 @@ public class ProfileController {
             Principal principal,
             @Valid @RequestBody ProfileRequest request
     ) {
-        Profile existingProfile = userService.findByEmail(principal.getName()).getProfile();
+        Profile existingProfile = profileService.getProfileByEmail(principal.getName());
         profileMapper.updateProfile(request, existingProfile);
         Profile profile = profileService.save(existingProfile);
         return ResponseEntity.ok(new ResponseDto<>(
@@ -66,9 +65,8 @@ public class ProfileController {
     public ResponseEntity<?> clearProfile(
             Principal principal
     ) {
-        Profile profile = userService.findByEmail(principal.getName()).getProfile();
-        profile.clear();
-        profile = profileService.save(profile);
+        Profile profile = profileService.getProfileByEmail(principal.getName());
+        profile = profileService.clearProfile(profile);
         return ResponseEntity.ok(new ResponseDto<>(
                 "Profile cleared successfully",
                 200,

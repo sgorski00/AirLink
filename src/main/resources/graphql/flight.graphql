@@ -1,4 +1,4 @@
-type Query {
+extend type Query {
     flights(
         pageInput: PageInput!
         sortInput: SortInput = {sortBy: "departure", sortDir: "asc"}
@@ -8,7 +8,7 @@ type Query {
     flight(id: ID!): Flight
 }
 
-type Mutation {
+extend type Mutation {
     deleteFlight(id: ID!): Flight
     restoreFlight(id: ID!): Flight
     createFlight(flightRequest: FlightRequest!): Flight
