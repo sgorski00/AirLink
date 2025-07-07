@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,7 +24,6 @@ import pl.sgorski.AirLink.model.auth.User;
 import pl.sgorski.AirLink.repository.ReservationRepository;
 import pl.sgorski.AirLink.service.auth.UserService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -54,12 +54,21 @@ public class ReservationServiceTests {
     private Flight flight;
 
     private Reservation reservation;
+    private User user;
 
     @BeforeEach
     void setUp() {
+        user = new User();
+        user.setEmail("test@email.com");
+        user.setId(1L);
+        Role role = new Role();
+        role.setName("ADMIN");
+        user.setRole(role);
+
         reservation = new Reservation();
         reservation.setFlight(flight);
         reservation.setNumberOfSeats(2);
+        reservation.setUser(user);
     }
 
     @Test
@@ -82,8 +91,6 @@ public class ReservationServiceTests {
 
     @Test
     void shouldCreateReservation() {
-        User user = new User();
-        user.setEmail("test@email.com");
         when(flight.isAvailableToBook(anyInt())).thenReturn(true);
         when(userService.findByEmail(anyString())).thenReturn(user);
         when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
@@ -120,8 +127,9 @@ public class ReservationServiceTests {
     @Test
     void shouldFindReservationById() {
         when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
+        when(userService.findByEmail(anyString())).thenReturn(user);
 
-        reservationService.findById(1L);
+        reservationService.findById(1L, anyString());
 
         verify(reservationRepository, times(1)).findById(1L);
     }
@@ -130,7 +138,7 @@ public class ReservationServiceTests {
     void shouldThrowIfReservationByIdNotFound() {
         when(reservationRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> reservationService.findById(1L));
+        assertThrows(NoSuchElementException.class, () -> reservationService.findById(1L, "test@email.com"));
 
         verify(reservationRepository, times(1)).findById(1L);
     }
@@ -158,9 +166,10 @@ public class ReservationServiceTests {
 
     @Test
     void shouldSoftDeleteById() {
+        when(userService.findByEmail(anyString())).thenReturn(user);
         when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
 
-        reservationService.deleteById(1L);
+        reservationService.deleteById(1L, "test@email.com");
 
         assertNotNull(reservation.getDeletedAt());
         verify(reservationRepository, times(1)).save(any(Reservation.class));
@@ -171,7 +180,7 @@ public class ReservationServiceTests {
     void shouldThrowWhileSoftDeletingByIdIfNotFound() {
         when(reservationRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> reservationService.deleteById(1L));
+        assertThrows(NoSuchElementException.class, () -> reservationService.deleteById(1L, "test@email.com"));
 
         verify(reservationRepository, times(1)).findById(1L);
         verify(reservationRepository, never()).save(any(Reservation.class));
@@ -207,8 +216,9 @@ public class ReservationServiceTests {
         when(flight.isAvailableToBook(anyInt())).thenReturn(true);
         when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
         when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
+        when(userService.findByEmail(anyString())).thenReturn(user);
 
-        Reservation saved = reservationService.updateReservationById(1L, updateRequest);
+        Reservation saved = reservationService.updateReservationById(1L, updateRequest, "test@email.com");
 
         assertEquals(ReservationStatus.CONFIRMED, saved.getStatus());
         verify(reservationRepository, times(1)).save(any(Reservation.class));
@@ -219,9 +229,10 @@ public class ReservationServiceTests {
         UpdateReservationRequest updateRequest = new UpdateReservationRequest();
         updateRequest.setStatus("NOTEXISTS");
         reservation.setStatus(ReservationStatus.PENDING);
+        when(userService.findByEmail(anyString())).thenReturn(user);
         when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
 
-        assertThrows(IllegalArgumentException.class, () -> reservationService.updateReservationById(1L, updateRequest));
+        assertThrows(IllegalArgumentException.class, () -> reservationService.updateReservationById(1L, updateRequest, "test@email.com"));
 
         verify(reservationRepository, never()).save(any(Reservation.class));
     }
@@ -233,18 +244,14 @@ public class ReservationServiceTests {
         reservation.setStatus(ReservationStatus.PENDING);
         when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
 
-        assertThrows(NullPointerException.class, () -> reservationService.updateReservationById(1L, updateRequest));
+        assertThrows(NullPointerException.class, () -> reservationService.updateReservationById(1L, updateRequest, "test@email.com"));
 
         verify(reservationRepository, never()).save(any(Reservation.class));
     }
 
     @Test
     void shouldReturnAllReservationsForUser() {
-        User user = new User();
-        Role role = new Role();
-        role.setName("USER");
-        user.setRole(role);
-        user.setId(1L);
+        user.getRole().setName("USER");
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("test@test.com");
         SecurityContext context = mock(SecurityContext.class);
@@ -263,11 +270,6 @@ public class ReservationServiceTests {
 
     @Test
     void shouldReturnAllReservationsForAdmin() {
-        User user = new User();
-        Role role = new Role();
-        role.setName("ADMIN");
-        user.setRole(role);
-        user.setId(1L);
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("test@test.com");
         SecurityContext context = mock(SecurityContext.class);
@@ -285,49 +287,39 @@ public class ReservationServiceTests {
     }
 
     @Test
-    void shouldReturnTrueIfIsOwner() {
-        Role role = new Role();
-        role.setName("USER");
-        User user = new User();
-        user.setId(1L);
-        user.setRole(role);
+    void shouldReturnReservationIfIsOwner() {
+        user.getRole().setName("USER");
         when(userService.findByEmail(anyString())).thenReturn(user);
         reservation.setUser(user);
         when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
 
-        boolean result = reservationService.haveAccessByEmail(1L, "test@email.com");
+        Reservation result = reservationService.returnIfHaveAccess(1L, "test@email.com");
 
-        assertTrue(result);
+        assertEquals(reservation, result);
+        verify(reservationRepository, times(1)).findById(1L);
     }
 
     @Test
-    void shouldReturnTrueIfIsAdmin() {
-        Role role = new Role();
-        role.setName("ADMIN");
-        User admin = new User();
-        admin.setRole(role);
-        when(userService.findByEmail(anyString())).thenReturn(admin);
-        reservation.setUser(new User());
-        when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
-
-        boolean result = reservationService.haveAccessByEmail(1L, "test@email.com");
-
-        assertTrue(result);
-    }
-
-    @Test
-    void shouldReturnFalseIfDoNotHaveAccess() {
-        Role role = new Role();
-        role.setName("USER");
-        User user = new User();
-        user.setRole(role);
-        user.setId(2L);
+    void shouldReturnReservationIfIsAdmin() {
         when(userService.findByEmail(anyString())).thenReturn(user);
         reservation.setUser(new User());
         when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
 
-        boolean result = reservationService.haveAccessByEmail(1L, "test@email.com");
+        Reservation result = reservationService.returnIfHaveAccess(1L, "test@email.com");
 
-        assertFalse(result);
+        assertEquals(reservation, result);
+        verify(reservationRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void shouldThrowIfDoNotHaveAccess() {
+        user.getRole().setName("USER");
+        when(userService.findByEmail(anyString())).thenReturn(user);
+        reservation.setUser(new User());
+        when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
+
+        assertThrows(AccessDeniedException.class, () -> reservationService.returnIfHaveAccess(1L, "test@email.com"));
+
+        verify(reservationRepository, times(1)).findById(1L);
     }
 }

@@ -34,13 +34,3 @@ input FlightRequest {
     toAirportId: Int!
     price: Float!
 }
-
-input PageInput {
-    page: Int = 1
-    size: Int = 10
-}
-
-input SortInput {
-    sortBy: String!
-    sortDir: String!
-}

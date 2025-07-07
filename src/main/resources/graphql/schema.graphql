@@ -1,2 +1,12 @@
 type Query { }
 type Mutation { }
+
+input PageInput {
+    page: Int = 1
+    size: Int = 10
+}
+
+input SortInput {
+    sortBy: String!
+    sortDir: String!
+}

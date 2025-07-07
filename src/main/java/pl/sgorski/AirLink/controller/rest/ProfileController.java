@@ -15,7 +15,6 @@ import pl.sgorski.AirLink.dto.ProfileRequest;
 import pl.sgorski.AirLink.mapper.ProfileMapper;
 import pl.sgorski.AirLink.model.Profile;
 import pl.sgorski.AirLink.service.ProfileService;
-import pl.sgorski.AirLink.service.auth.UserService;
 
 import java.security.Principal;
 
