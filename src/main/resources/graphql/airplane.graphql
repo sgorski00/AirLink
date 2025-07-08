@@ -1,0 +1,29 @@
+extend type Query {
+    airplanes(
+        pageInput: PageInput!
+    ): [Airplane!]!
+    airplane(id: ID!): Airplane
+}
+
+extend type Mutation {
+    createAirplane(input: AirplaneInput!): Airplane!
+    updateAirplane(id: ID!, input: AirplaneInput!): Airplane!
+    deleteAirplane(id: ID!): Airplane!
+    restoreAirplane(id: ID!): Airplane!
+}
+
+type Airplane {
+    id: ID!
+    name: String!
+    code: String!
+    serialNumber: String!
+    capacity: Int!
+    incomingFlight: Flight
+}
+
+input AirplaneInput {
+    name: String!
+    code: String!
+    serialNumber: String!
+    capacity: Int!
+}
