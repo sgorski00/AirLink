@@ -1,4 +1,4 @@
-package pl.sgorski.AirLink.controller;
+package pl.sgorski.AirLink.controller.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,7 +14,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 import pl.sgorski.AirLink.dto.ReservationResponse;
 import pl.sgorski.AirLink.dto.generic.PaginationResponseDto;
@@ -76,11 +75,10 @@ public class ReservationController {
             @PathVariable Long id,
             Principal principal
     ) {
-        if(!reservationService.haveAccessByEmail(id, principal.getName())) throw new AccessDeniedException("You do not have access to this reservation");
         return ResponseEntity.ok(new ResponseDto<>(
             "Reservation found",
             200,
-            mapper.toResponse(reservationService.findById(id))
+            mapper.toResponse(reservationService.findById(id, principal.getName()))
         ));
     }
 
@@ -113,8 +111,7 @@ public class ReservationController {
             @Valid @RequestBody UpdateReservationRequest request,
             Principal principal
     ) {
-        if(!reservationService.haveAccessByEmail(id, principal.getName())) throw new AccessDeniedException("You do not have access to this reservation");
-        Reservation updated = reservationService.updateReservationById(id, request);
+        Reservation updated = reservationService.updateReservationById(id, request, principal.getName());
         return ResponseEntity.ok(new ResponseDto<>(
             "Reservation updated",
             200,
@@ -133,11 +130,10 @@ public class ReservationController {
             @PathVariable Long id,
             Principal principal
     ) {
-        if(!reservationService.haveAccessByEmail(id, principal.getName())) throw new AccessDeniedException("You do not have access to this reservation");
         return ResponseEntity.ok(new ResponseDto<>(
             "Reservation deleted",
             200,
-            mapper.toResponse(reservationService.deleteById(id))
+            mapper.toResponse(reservationService.deleteById(id, principal.getName()))
         ));
     }
 
@@ -169,11 +165,10 @@ public class ReservationController {
             @PathVariable Long id,
             Principal principal
     ) {
-        if(!reservationService.haveAccessByEmail(id, principal.getName())) throw new AccessDeniedException("You do not have access to this reservation");
         return ResponseEntity.ok(new ResponseDto<>(
                 "Reservation history found",
                 200,
-                reservationHistoryService.getHistoryByReservationId(id).stream()
+                reservationHistoryService.getHistoryByReservationId(id, principal.getName()).stream()
                         .map(historyMapper::toResponse)
         ));
     }

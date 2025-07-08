@@ -9,6 +9,7 @@ import pl.sgorski.AirLink.model.localization.Country;
 import pl.sgorski.AirLink.repository.localization.CountryRepository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -91,5 +92,12 @@ public class CountryServiceTests {
         assertNotNull(result);
         assertEquals("Test Country", result.getName());
         assertEquals(countryId, result.getId());
+    }
+
+    @Test
+    void shouldThrowIfCountryByIdNotFound() {
+        when(countryRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> countryService.findById(1L));
     }
 }

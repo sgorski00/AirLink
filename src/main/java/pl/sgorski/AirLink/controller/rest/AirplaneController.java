@@ -1,4 +1,4 @@
-package pl.sgorski.AirLink.controller;
+package pl.sgorski.AirLink.controller.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

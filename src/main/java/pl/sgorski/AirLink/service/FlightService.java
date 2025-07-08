@@ -2,8 +2,6 @@ package pl.sgorski.AirLink.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -11,7 +9,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import pl.sgorski.AirLink.model.Airplane;
 import pl.sgorski.AirLink.model.Flight;
-import pl.sgorski.AirLink.repository.FlightRepository;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -21,69 +18,58 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class FlightService {
 
-    private final FlightRepository flightRepository;
+    private final FlightCacheService flightCacheService;
     private final AirplaneService airplaneService;
 
-    @CachePut(value = "flights", key = "#flight.id")
     public Flight save(Flight flight) {
         Airplane airplane = airplaneService.findByIdWithFlights(flight.getAirplane().getId());
-        if (!airplane.isAvailable(flight.getDeparture(), flight.getArrival())) {
+        if (!airplane.isAvailable(flight)) {
             throw new IllegalArgumentException("Airplane is not available for the specified time.");
         }
-        return flightRepository.save(flight);
+        return flightCacheService.save(flight);
     }
 
     public List<Flight> findAll() {
-        return flightRepository.findAll();
+        return flightCacheService.findAll();
     }
 
     public Page<Flight> findAllActivePaginated(Pageable pageable, Long airportFrom, Long airportTo) {
-        return flightRepository.findAllActiveFiltered(pageable, airportFrom, airportTo);
+        return flightCacheService.findAllActiveFiltered(pageable, airportFrom, airportTo);
     }
 
-    @Cacheable(value = "flights", key = "#id")
     public Flight findById(Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ADMIN"));
-        Flight flight = flightRepository.findById(id).orElseThrow(
-                () -> new NoSuchElementException("Flight not found")
-        );
-        if (flight.isActive() || isAdmin) {
+        log.info("Authorities: {}", authentication.getAuthorities());
+        Flight flight = flightCacheService.findById(id);
+        if (flight != null && (flight.isActive() || isAdmin)) {
             return flight;
         } else {
-            throw new NoSuchElementException("Flight is no longer available active");
+            throw new NoSuchElementException("Flight is no longer available");
         }
     }
 
     public long count() {
-        return flightRepository.count();
+        return flightCacheService.count();
     }
 
-    @CachePut(value = "flights", key = "#id")
-    public Flight deleteFlightById(Long id) {
-        Flight flight = flightRepository.findById(id).orElseThrow(
-                () -> new NoSuchElementException("Flight not found")
-        );
+    public Flight deleteById(Long id) {
+        Flight flight = flightCacheService.findById(id);
         if (!flight.isActive()) {
             throw new IllegalArgumentException("Cannot delete a flight that has already departed.");
         }
         flight.delete();
-        return flightRepository.save(flight);
+        return flightCacheService.save(flight);
     }
 
-    @CachePut(value = "flights", key = "#id")
     public Flight restoreById(Long id) {
-        Flight flight = flightRepository.findDeletedById(id).orElseThrow(
-                () -> new NoSuchElementException("Flight not found or not deleted")
-        );
+        Flight flight = flightCacheService.findDeletedById(id);
         flight.restore();
-        return flightRepository.save(flight);
+        return flightCacheService.save(flight);
     }
 
     public Flight findByIdWithReservations(Long flightId) {
-        return flightRepository.findByIdWithReservations(flightId).orElseThrow(
-                () -> new NoSuchElementException("Flight with id: " + flightId + " not found")
-        );
+        return flightCacheService.findByIdWithReservations(flightId);
     }
 }

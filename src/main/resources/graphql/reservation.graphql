@@ -1,0 +1,41 @@
+extend type Query {
+    reservations(
+        pageInput: PageInput!
+        sortInput: SortInput = {sortBy: "createdAt", sortDir: "desc"}
+    ): [Reservation!]!
+    reservation(id: ID!): Reservation!
+    reservationHistory(id: ID!): [ReservationHistory!]!
+}
+
+extend type Mutation {
+    createReservation(reservationRequest: NewReservationRequest!): Reservation!
+    updateReservation(id: ID!, reservationRequest: UpdateReservationRequest!): Reservation!
+    deleteReservation(id: ID!): Reservation!
+    restoreReservation(id: ID!): Reservation!
+}
+
+type Reservation {
+    id: ID
+    user: String
+    flight: Flight
+    numberOfSeats: Int
+    totalPrice: Float
+    status: String
+    createdAt: String
+}
+
+type ReservationHistory {
+    id: ID
+    reservationId: ID
+    status: String
+    createdAt: String
+}
+
+input NewReservationRequest {
+    flightId: ID!
+    numberOfSeats: Int!
+}
+
+input UpdateReservationRequest {
+    status: String!
+}

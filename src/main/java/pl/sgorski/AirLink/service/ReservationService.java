@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -50,9 +51,8 @@ public class ReservationService {
         return savedReservation;
     }
 
-    public Reservation findById(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Reservation not found"));
+    public Reservation findById(Long id, String requesterEmail) {
+        return returnIfHaveAccess(id, requesterEmail);
     }
 
     public List<Reservation> findAll() {
@@ -67,10 +67,8 @@ public class ReservationService {
                 : reservationRepository.findAllByUserId(user.getId(), pageable);
     }
 
-    public Reservation deleteById(Long id) {
-        Reservation reservation = reservationRepository.findById(id).orElseThrow(
-                        () -> new NoSuchElementException("Reservation not found or already deleted")
-        );
+    public Reservation deleteById(Long id, String requesterEmail) {
+        Reservation reservation = returnIfHaveAccess(id, requesterEmail);
         reservation.setStatus(ReservationStatus.DELETED);
         return reservationRepository.save(reservation);
     }
@@ -88,8 +86,8 @@ public class ReservationService {
         return reservationRepository.count();
     }
 
-    public Reservation updateReservationById(Long id, UpdateReservationRequest request) {
-        Reservation reservation = findById(id);
+    public Reservation updateReservationById(Long id, UpdateReservationRequest request, String requesterEmail) {
+        Reservation reservation = findById(id, requesterEmail);
         try{
             reservation.setStatus(ReservationStatus.valueOf(request.getStatus().toUpperCase()));
         } catch (IllegalArgumentException e) {
@@ -98,9 +96,14 @@ public class ReservationService {
         return save(reservation);
     }
 
-    public boolean haveAccessByEmail(Long reservationId, String requesterEmail) {
-        Reservation reservation = findById(reservationId);
+    public Reservation returnIfHaveAccess(Long reservationId, String requesterEmail) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NoSuchElementException("Reservation not found"));
         User user = userService.findByEmail(requesterEmail);
-        return user.haveAccess(reservation);
+        if(user.haveAccess(reservation)) {
+            return reservation;
+        } else {
+            throw new AccessDeniedException("You do not have access to this reservation");
+        }
     }
 }

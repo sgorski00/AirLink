@@ -1,4 +1,4 @@
-package pl.sgorski.AirLink.controller;
+package pl.sgorski.AirLink.controller.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -72,7 +72,7 @@ public class FlightController {
     public ResponseEntity<?> deleteFlight(
             @PathVariable Long id
     ) {
-        FlightResponse deletedFLight = flightMapper.toResponse(flightService.deleteFlightById(id));
+        FlightResponse deletedFLight = flightMapper.toResponse(flightService.deleteById(id));
         return ResponseEntity.ok(new ResponseDto<>("Flight deleted", 200, deletedFLight));
     }
 

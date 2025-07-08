@@ -1,4 +1,4 @@
-package pl.sgorski.AirLink.controller;
+package pl.sgorski.AirLink.controller.rest;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

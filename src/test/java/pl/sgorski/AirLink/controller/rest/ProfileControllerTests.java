@@ -1,4 +1,4 @@
-package pl.sgorski.AirLink.controller;
+package pl.sgorski.AirLink.controller.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,9 +34,6 @@ public class ProfileControllerTests {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @MockitoBean
-    private UserService userService;
 
     @MockitoBean
     private ProfileService profileService;
@@ -82,7 +79,7 @@ public class ProfileControllerTests {
 
     @Test
     void shouldShowProfileDetails() throws Exception {
-        when(userService.findByEmail(anyString())).thenReturn(user);
+        when(profileService.getProfileByEmail(anyString())).thenReturn(profile);
         when(profileMapper.toResponse(any(Profile.class))).thenReturn(response);
         mockMvc.perform(get("/api/profile")
                         .principal(() -> "test@test.pl"))
@@ -102,7 +99,7 @@ public class ProfileControllerTests {
 
     @Test
     void shouldNotShowProfileDetailsIfUserNotFound() throws Exception {
-        when(userService.findByEmail(anyString())).thenThrow(new NoSuchElementException("User not found"));
+        when(profileService.getProfileByEmail(anyString())).thenThrow(new NoSuchElementException("User not found"));
         mockMvc.perform(get("/api/profile")
                         .principal(() -> "test@test.pl"))
                 .andExpect(status().isNotFound())
@@ -113,7 +110,7 @@ public class ProfileControllerTests {
 
     @Test
     void shouldUpdateProfile() throws Exception {
-        when(userService.findByEmail(anyString())).thenReturn(user);
+        when(profileService.getProfileByEmail(anyString())).thenReturn(profile);
         when(profileService.save(any(Profile.class))).thenReturn(profile);
         when(profileMapper.toResponse(any(Profile.class))).thenReturn(response);
 
@@ -129,7 +126,7 @@ public class ProfileControllerTests {
 
     @Test
     void shouldNotUpdateProfileIfUserNotFound() throws Exception {
-        when(userService.findByEmail(anyString())).thenThrow(new NoSuchElementException("User not found"));
+        when(profileService.getProfileByEmail(anyString())).thenThrow(new NoSuchElementException("User not found"));
 
         mockMvc.perform(put("/api/profile")
                         .principal(() -> "test@test.pl")
@@ -143,8 +140,8 @@ public class ProfileControllerTests {
 
     @Test
     void shouldClearProfile() throws Exception {
-        when(userService.findByEmail(anyString())).thenReturn(user);
-        when(profileService.save(any(Profile.class))).thenReturn(profile);
+        when(profileService.getProfileByEmail(anyString())).thenReturn(profile);
+        when(profileService.clearProfile(any(Profile.class))).thenReturn(profile);
         when(profileMapper.toResponse(any(Profile.class))).thenReturn(response);
 
         mockMvc.perform(put("/api/profile/clear")
@@ -157,7 +154,7 @@ public class ProfileControllerTests {
 
     @Test
     void shouldNotClearProfileIfUserNotFound() throws Exception {
-        when(userService.findByEmail(anyString())).thenThrow(new NoSuchElementException("User not found"));
+        when(profileService.getProfileByEmail(anyString())).thenThrow(new NoSuchElementException("User not found"));
 
         mockMvc.perform(put("/api/profile/clear")
                         .principal(() -> "test@test.pl"))

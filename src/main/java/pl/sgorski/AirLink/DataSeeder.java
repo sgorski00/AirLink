@@ -25,6 +25,7 @@ import java.util.List;
 @Log4j2
 @Component
 @RequiredArgsConstructor
+@org.springframework.context.annotation.Profile("!test")
 public class DataSeeder implements ApplicationRunner {
 
     private final RoleService roleService;

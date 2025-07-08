@@ -1,0 +1,29 @@
+extend type Query {
+    profile: Profile!
+}
+
+extend type Mutation {
+    updateProfile(profileInput: ProfileInput!): Profile!
+    clearProfile: Profile!
+}
+
+type Profile {
+    email: String
+    firstName: String
+    lastName: String
+    phoneNumber: String
+    country: String
+    zip: String
+    city: String
+    street: String
+}
+
+input ProfileInput {
+    firstName: String!
+    lastName: String!
+    phoneNumber: String!
+    country: String!
+    zip: String!
+    city: String!
+    street: String!
+}

@@ -1,4 +1,4 @@
-package pl.sgorski.AirLink.controller;
+package pl.sgorski.AirLink.controller.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -22,6 +22,7 @@ import pl.sgorski.AirLink.service.ReservationHistoryService;
 import pl.sgorski.AirLink.service.ReservationService;
 import pl.sgorski.AirLink.service.auth.JwtService;
 
+import org.springframework.security.access.AccessDeniedException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -108,8 +109,7 @@ public class ReservationControllerTests {
         response.setStatus("CONFIRMED");
         response.setUser("testUser");
 
-        when(reservationService.haveAccessByEmail(anyLong(), anyString())).thenReturn(true);
-        when(reservationService.findById(anyLong())).thenReturn(new Reservation());
+        when(reservationService.findById(anyLong(), anyString())).thenReturn(new Reservation());
         when(reservationMapper.toResponse(any(Reservation.class))).thenReturn(response);
 
         mockMvc.perform(get("/api/reservations/{id}", 1L)
@@ -125,8 +125,7 @@ public class ReservationControllerTests {
 
     @Test
     void shouldReturnDetailProblemIfReservationNotFound() throws Exception {
-        when(reservationService.haveAccessByEmail(anyLong(), anyString())).thenReturn(true);
-        when(reservationService.findById(anyLong())).thenThrow(
+        when(reservationService.findById(anyLong(), anyString())).thenThrow(
                 new NoSuchElementException("Reservation not found")
         );
 
@@ -140,7 +139,8 @@ public class ReservationControllerTests {
 
     @Test
     void shouldReturnDetailProblemIfUserNotAllowed() throws Exception {
-        when(reservationService.haveAccessByEmail(anyLong(), anyString())).thenReturn(false);
+        when(reservationService.findById(anyLong(), anyString())).thenThrow(new AccessDeniedException("You do not have access to this reservation"));
+
 
         mockMvc.perform(get("/api/reservations/{id}", 1L)
                         .principal(() -> "testUser"))
@@ -267,9 +267,8 @@ public class ReservationControllerTests {
         reservation.setId(1L);
         reservation.setStatus(ReservationStatus.PENDING);
 
-        when(reservationService.haveAccessByEmail(anyLong(), anyString())).thenReturn(true);
-        when(reservationService.findById(anyLong())).thenReturn(reservation);
-        when(reservationService.updateReservationById(anyLong(), any(UpdateReservationRequest.class))).thenReturn(reservation);
+        when(reservationService.findById(anyLong(), anyString())).thenReturn(reservation);
+        when(reservationService.updateReservationById(anyLong(), any(UpdateReservationRequest.class), anyString())).thenReturn(reservation);
         when(reservationMapper.toResponse(any(Reservation.class))).thenReturn(new ReservationResponse());
 
         mockMvc.perform(put("/api/reservations/{id}", 1L)
@@ -281,7 +280,7 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.data").isNotEmpty());
 
-        verify(reservationService, times(1)).updateReservationById(anyLong(), any(UpdateReservationRequest.class));
+        verify(reservationService, times(1)).updateReservationById(anyLong(), any(UpdateReservationRequest.class), anyString());
     }
 
     @Test
@@ -290,9 +289,8 @@ public class ReservationControllerTests {
         reservation.setId(1L);
         reservation.setStatus(ReservationStatus.PENDING);
 
-        when(reservationService.haveAccessByEmail(anyLong(), anyString())).thenReturn(true);
-        when(reservationService.findById(anyLong())).thenReturn(reservation);
-        when(reservationService.updateReservationById(anyLong(), any(UpdateReservationRequest.class))).thenThrow(new IllegalArgumentException("Invalid status provided: NOTEXISTS"));
+        when(reservationService.findById(anyLong(), anyString())).thenReturn(reservation);
+        when(reservationService.updateReservationById(anyLong(), any(UpdateReservationRequest.class), anyString())).thenThrow(new IllegalArgumentException("Invalid status provided: NOTEXISTS"));
         when(reservationMapper.toResponse(any(Reservation.class))).thenReturn(new ReservationResponse());
 
         mockMvc.perform(put("/api/reservations/{id}", 1L)
@@ -304,7 +302,7 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.data").doesNotExist());
 
-        verify(reservationService, times(1)).updateReservationById(anyLong(), any(UpdateReservationRequest.class));
+        verify(reservationService, times(1)).updateReservationById(anyLong(), any(UpdateReservationRequest.class), anyString());
     }
 
     @Test
@@ -316,13 +314,12 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(500))
                 .andExpect(jsonPath("$.data").doesNotExist());
 
-        verify(reservationService, never()).updateReservationById(anyLong(), any(UpdateReservationRequest.class));
+        verify(reservationService, never()).updateReservationById(anyLong(), any(UpdateReservationRequest.class), anyString());
     }
 
     @Test
     void shouldNotUpdateReservationStatusIfReservationNotFound() throws Exception {
-        when(reservationService.haveAccessByEmail(anyLong(), anyString())).thenReturn(true);
-        when(reservationService.updateReservationById(anyLong(), any(UpdateReservationRequest.class)))
+        when(reservationService.updateReservationById(anyLong(), any(UpdateReservationRequest.class), anyString()))
                 .thenThrow(new NoSuchElementException("Reservation not found"));
 
         mockMvc.perform(put("/api/reservations/{id}", 1L)
@@ -334,12 +331,12 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.data").doesNotExist());
 
-        verify(reservationService, times(1)).updateReservationById(anyLong(), any(UpdateReservationRequest.class));
+        verify(reservationService, times(1)).updateReservationById(anyLong(), any(UpdateReservationRequest.class), anyString());
     }
 
     @Test
     void shouldNotUpdateReservationStatusIfUserNotAllowed() throws Exception {
-        when(reservationService.haveAccessByEmail(anyLong(), anyString())).thenReturn(false);
+        when(reservationService.updateReservationById(anyLong(), any(UpdateReservationRequest.class), anyString())).thenThrow(new AccessDeniedException("You do not have access to this reservation"));
 
         mockMvc.perform(put("/api/reservations/{id}", 1L)
                         .contentType("application/json")
@@ -350,15 +347,14 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(403))
                 .andExpect(jsonPath("$.data").doesNotExist());
 
-        verify(reservationService, times(0)).updateReservationById(anyLong(), any(UpdateReservationRequest.class));
+        verify(reservationService, times(1)).updateReservationById(anyLong(), any(UpdateReservationRequest.class), anyString());
     }
 
 
     @Test
     void shouldDeleteReservation() throws Exception {
-        when(reservationService.haveAccessByEmail(anyLong(), anyString())).thenReturn(true);
         when(reservationMapper.toResponse(any(Reservation.class))).thenReturn(new ReservationResponse());
-        when(reservationService.deleteById(anyLong())).thenReturn(new Reservation());
+        when(reservationService.deleteById(anyLong(), anyString())).thenReturn(new Reservation());
 
         mockMvc.perform(delete("/api/reservations/{id}", 1L)
                         .principal(() -> "testUser"))
@@ -367,13 +363,12 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.data").isNotEmpty());
 
-        verify(reservationService, times(1)).deleteById(anyLong());
+        verify(reservationService, times(1)).deleteById(anyLong(), anyString());
     }
 
     @Test
     void shouldNotDeleteReservationIfNotFound() throws Exception {
-        when(reservationService.haveAccessByEmail(anyLong(), anyString())).thenReturn(true);
-        when(reservationService.deleteById(anyLong())).thenThrow(new NoSuchElementException("Reservation not found"));
+        when(reservationService.deleteById(anyLong(), anyString())).thenThrow(new NoSuchElementException("Reservation not found"));
 
         mockMvc.perform(delete("/api/reservations/{id}", 1L)
                         .principal(() -> "testUser"))
@@ -382,7 +377,7 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.data").doesNotExist());
 
-        verify(reservationService, times(1)).deleteById(anyLong());
+        verify(reservationService, times(1)).deleteById(anyLong(), anyString());
     }
 
     @Test
@@ -394,7 +389,7 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(500))
                 .andExpect(jsonPath("$.data").doesNotExist());
 
-        verify(reservationService, never()).deleteById(anyLong());
+        verify(reservationService, never()).deleteById(anyLong(), anyString());
     }
 
     @Test
@@ -406,7 +401,7 @@ public class ReservationControllerTests {
                 .andExpect(jsonPath("$.status").value(500))
                 .andExpect(jsonPath("$.data").doesNotExist());
 
-        verify(reservationService, never()).deleteById(anyLong());
+        verify(reservationService, never()).deleteById(anyLong(), anyString());
     }
 
     @Test

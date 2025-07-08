@@ -8,8 +8,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import pl.sgorski.AirLink.model.Profile;
 import pl.sgorski.AirLink.repository.ProfileRepository;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProfileServiceTests {
@@ -26,6 +29,36 @@ public class ProfileServiceTests {
 
         profileService.save(profile);
 
+        verify(profileRepository, times(1)).save(profile);
+    }
+
+    @Test
+    void shouldReturnProfileByEmail() {
+        when(profileRepository.findByEmail(anyString())).thenReturn(Optional.of(new Profile()));
+
+        Profile result = profileService.getProfileByEmail("test");
+
+        assertNotNull(result);
+        verify(profileRepository, times(1)).findByEmail("test");
+    }
+
+    @Test
+    void shouldThrowWhenProfileNotFoundByEmail() {
+        when(profileRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> profileService.getProfileByEmail("test"));
+
+        verify(profileRepository, times(1)).findByEmail("test");
+    }
+
+    @Test
+    void shouldClearProfile() {
+        Profile profile = new Profile();
+        when(profileRepository.save(profile)).thenReturn(profile);
+
+        Profile result = profileService.clearProfile(profile);
+
+        assertNotNull(result);
         verify(profileRepository, times(1)).save(profile);
     }
 }

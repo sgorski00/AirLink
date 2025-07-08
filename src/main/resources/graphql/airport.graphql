@@ -1,0 +1,24 @@
+extend type Query {
+    airports(
+        pageInput: PageInput!
+        countryId: ID
+    ): [Airport!]!
+    airport(id: ID!): Airport!
+}
+
+extend type Mutation {
+    createAirport(input: AirportInput!): Airport!
+    updateAirport(id: ID!, input: AirportInput!): Airport!
+}
+
+type Airport {
+    id: ID!
+    icao: String!
+    city: String!
+    country: String!
+}
+
+input AirportInput {
+    cityId: ID!
+    icao: String!
+}

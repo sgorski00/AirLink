@@ -9,6 +9,8 @@ import pl.sgorski.AirLink.model.localization.City;
 import pl.sgorski.AirLink.repository.localization.CityRepository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -87,5 +89,12 @@ public class CityServiceTests {
         assertNotNull(foundCity);
         assertEquals(1L, foundCity.getId());
         assertEquals("City by ID", foundCity.getName());
+    }
+
+    @Test
+    void shouldThrowIfCityByIdNotFound() {
+        when(cityRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> cityService.findById(1L));
     }
 }

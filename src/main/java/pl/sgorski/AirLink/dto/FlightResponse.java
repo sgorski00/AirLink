@@ -19,7 +19,7 @@ public class FlightResponse {
     @Schema(description = "Flight arrival time", example = "2023-10-01T16:45:00")
     private LocalDateTime arrival;
     @Schema(description = "Flight price", example = "199.99")
-    private String price;
+    private Double price;
     @Schema(description = "Airplane name", example = "Boeing 737")
     private String airplaneName;
     @Schema(description = "Flight created at", example = "2023-10-01T12:00:00")
