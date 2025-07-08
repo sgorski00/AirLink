@@ -23,7 +23,7 @@ type Flight {
     arrival: String!
     price: Float!
     airplaneName: String!
-    createdAt: String!
+    createdAt: String
 }
 
 input FlightRequest {

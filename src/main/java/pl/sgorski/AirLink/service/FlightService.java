@@ -41,11 +41,12 @@ public class FlightService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ADMIN"));
+        log.info("Authorities: {}", authentication.getAuthorities());
         Flight flight = flightCacheService.findById(id);
         if (flight != null && (flight.isActive() || isAdmin)) {
             return flight;
         } else {
-            throw new NoSuchElementException("Flight is no longer available active");
+            throw new NoSuchElementException("Flight is no longer available");
         }
     }
 

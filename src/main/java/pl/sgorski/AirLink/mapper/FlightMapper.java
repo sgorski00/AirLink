@@ -34,6 +34,9 @@ public abstract class FlightMapper {
     @Mapping(target = "to", source = "toAirportId", qualifiedByName = "airportById")
     public abstract Flight toFlight(FlightRequest flightRequest);
 
+    @Mapping(target = "airplane", source = "airplaneId", qualifiedByName = "airplaneById")
+    @Mapping(target = "from", source = "fromAirportId", qualifiedByName = "airportById")
+    @Mapping(target = "to", source = "toAirportId", qualifiedByName = "airportById")
     public abstract void updateFlight(FlightRequest flightRequest, @MappingTarget Flight flight);
 
     @Named("airplaneById")
