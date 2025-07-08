@@ -1,4 +1,4 @@
-name: Test and Coverage
+name: test-coverage
 
 on: 
  push:
@@ -22,9 +22,6 @@ jobs:
 
       - name: Build and run tests
         run: ./mvnw clean verify
-
-      - name: Generate JaCoCo coverage report
-        run: ./mvnw jacoco:report
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>pl.sgorski</groupId>
 	<artifactId>AirLink</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>AirLink</name>
 	<description>Flights reservation API</description>
 	<developers>
