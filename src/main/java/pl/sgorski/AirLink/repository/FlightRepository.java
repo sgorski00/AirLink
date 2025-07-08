@@ -25,11 +25,6 @@ public interface FlightRepository extends JpaRepository<Flight, Long> {
     """)
     Page<Flight> findAllActiveFiltered(Pageable pageable, @Param("airportFrom") Long airportFrom, @Param("airportTo") Long airportTo);
 
-    @NonNull
-    @Query("SELECT f FROM Flight f WHERE f.deletedAt IS NULL AND f.id = :id")
-    @Override
-    Optional<Flight> findById(@NonNull Long id);
-
     @Query("SELECT f FROM Flight f LEFT JOIN FETCH f.reservations WHERE f.id = :id AND f.deletedAt IS NULL")
     Optional<Flight> findByIdWithReservations(Long id);
 
