@@ -3,52 +3,21 @@
 ![GraphQL](https://img.shields.io/badge/GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white)
 [![codecov](https://codecov.io/gh/sgorski00/AirLink/graph/badge.svg?token=8CS976QYZG)](https://codecov.io/gh/sgorski00/AirLink)
 
-
 # AirLink
 
 ## Description
 
-AirLink is a flight reservation application that support REST API and GraphQL written in Java 21 and Spring Boot 3.5.0.
+AirLink is a flight reservation application that support REST API and GraphQL made in Java 21 and Spring Boot 3.5.0.
 
-## Live demo
-
-App is available here:  
-[https://airlink-zsy6.onrender.com/](https://airlink-zsy6.onrender.com/)
-
-## Documentation
-
-### API
-
-Swagger UI is available at:
-[https://airlink-zsy6.onrender.com/docs](https://airlink-zsy6.onrender.com/docs)
-
-Or locally:
-[http://localhost:8080/docs](http://localhost:8080/docs) 
-
-### GraphQL
-GraphQL Playground is available at:
-[https://airlink-zsy6.onrender.com/graphiql](https://airlink-zsy6.onrender.com/graphiql)
-
----
-
-## Features
-
-- Flight booking and management (REST & GraphQL)
-- Airport, airplane, and user profile management
-- Pagination, sorting, and filtering support
-- User registration and login (JWT authentication)
-- Email notifications with Thymeleaf templates
-- Soft delete and record restoration
-- Reservations status history
-
----
+System supports caching and is fully validated.
 
 ## Getting Started
 
-Make sure you have Docker and Docker Compose installed. 
+Make sure you have Docker and Docker Compose installed.
+
 Before installation, ensure that the `.env` file is filled out correctly.
 
-To run application locally simply run `make up`.
+To run application locally simply run `make up` from the project main folder. 
 
 ## Environment Variables
 
@@ -92,6 +61,31 @@ JWT_EXPIRATION_TIME=86400000
 | `make shell`                      | Open shell inside app container              |
 | `make redis`                      | Open Redis CLI                               |
 | `make flyway-migrate`             | Run database migrations Flyway               |
+
+---
+
+## Documentation
+
+### API
+
+Swagger UI is available locally at:
+[http://localhost:8080/docs](http://localhost:8080/docs) 
+
+### GraphQL
+GraphQL Playground is available locally at:
+[http://localhost:8080/graphiql](http://localhost:8080/graphiql)
+
+---
+
+## Features
+
+- Flight booking and management (REST & GraphQL)
+- Airport, airplane, and user profile management
+- Pagination, sorting, and filtering support
+- User registration and login (JWT authentication)
+- Email notifications with Thymeleaf templates
+- Soft delete and record restoration
+- Reservations status history
 
 ---
 
